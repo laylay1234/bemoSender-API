@@ -9,7 +9,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0018_auto_20220426_1746'),
+        ('bemosenderrr', '0018_auto_20220426_1746'),
     ]
 
     operations = [
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('limit_12_month', models.CharField(help_text='The cumulative amount of all operations within the last 12 month', max_length=255)),
                 ('last_12_month_refresh', models.DateTimeField(help_text='The date at which the last yearly reset was done')),
                 ('total_transfered_amount', models.CharField(help_text='The total of all operations made since the beginning', max_length=255)),
-                ('global_transaction', models.ForeignKey(blank=True, help_text='Global transaction associated to the operation (optional)', null=True, on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.globaltransaction')),
+                ('global_transaction', models.ForeignKey(blank=True, help_text='Global transaction associated to the operation (optional)', null=True, on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.globaltransaction')),
                 ('user', models.ForeignKey(help_text='The user that did the operation', on_delete=django.db.models.deletion.RESTRICT, to=settings.AUTH_USER_MODEL)),
             ],
             options={

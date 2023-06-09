@@ -1,9 +1,9 @@
 from celery import shared_task
 import requests
-from bemoSenderr.logger import send_email_celery_exception
-from bemoSenderr.models.base import PartnerType
-from bemoSenderr.models.partner.base import AbstractConversionPartner
-from bemoSenderr.utils.log import debug
+from bemosenderrr.logger import send_email_celery_exception
+from bemosenderrr.models.base import PartnerType
+from bemosenderrr.models.partner.base import AbstractConversionPartner
+from bemosenderrr.utils.log import debug
 from django.apps import apps
 
 
@@ -23,7 +23,7 @@ class CurrConvOperation(AbstractConversionPartner):
         ConversionAPI_key = 'b7ee3b79d0c745d1677d'
         try:
             url = str(api_config['url'])
-            partner = apps.get_model('bemoSenderr.Partner').objects.filter(type=PartnerType.conversion).first()
+            partner = apps.get_model('bemosenderrr.Partner').objects.filter(type=PartnerType.conversion).first()
             if partner:
                 credentials = partner.api_user.credentials
                 url = url.replace('from', _from).replace('to',to_).replace('api_key', credentials['api_key'])

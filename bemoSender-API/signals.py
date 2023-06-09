@@ -1,34 +1,34 @@
 from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
-from bemoSenderr.models.base import CollectTransactionStatus, FundingTransactionStatus, GlobalTransactionStatus, VerificationStatus
-from bemoSenderr.models.global_transaction import GlobalTransaction
-from bemoSenderr.models.partner.bank_verification import UserBankVerificationRequest
-from bemoSenderr.models.partner.kyc_verification import KycVerificationRequest
-from bemoSenderr.models.partner.partner import AppSettings, Country, Currency, ExchangeRateTier, Partner, PartnerExchangeRate, TransactionMethodAvailability
-from bemoSenderr.models.partner.transactions import CollectTransaction, FundingTransaction
-from bemoSenderr.models.task import PeriodicTasksEntry
-from bemoSenderr.operations import  SendMoney
-from bemoSenderr.services import CountryService, CurrencyService, SyncCollectTransactions, sync_app_settings, sync_bank_verification_status, sync_kyc_verification_status
-from bemoSenderr.services import push_globaltx_datastore
+from bemosenderrr.models.base import CollectTransactionStatus, FundingTransactionStatus, GlobalTransactionStatus, VerificationStatus
+from bemosenderrr.models.global_transaction import GlobalTransaction
+from bemosenderrr.models.partner.bank_verification import UserBankVerificationRequest
+from bemosenderrr.models.partner.kyc_verification import KycVerificationRequest
+from bemosenderrr.models.partner.partner import AppSettings, Country, Currency, ExchangeRateTier, Partner, PartnerExchangeRate, TransactionMethodAvailability
+from bemosenderrr.models.partner.transactions import CollectTransaction, FundingTransaction
+from bemosenderrr.models.task import PeriodicTasksEntry
+from bemosenderrr.operations import  SendMoney
+from bemosenderrr.services import CountryService, CurrencyService, SyncCollectTransactions, sync_app_settings, sync_bank_verification_status, sync_kyc_verification_status
+from bemosenderrr.services import push_globaltx_datastore
 from redbeat import RedBeatSchedulerEntry as Entry
-from bemoSenderr.tasks import update_rates
+from bemosenderrr.tasks import update_rates
 
-from bemoSenderr.utils.notifications import NotificationsHandler
-from bemoSenderr.utils.pinpoint import PinpointWrapper
-from bemoSenderr.utils.sync_flinks_signup_data import sync_flinks_signup_data
+from bemosenderrr.utils.notifications import NotificationsHandler
+from bemosenderrr.utils.pinpoint import PinpointWrapper
+from bemosenderrr.utils.sync_flinks_signup_data import sync_flinks_signup_data
 from .celery import app
 from django.db import transaction
 from loguru import logger
 from django.utils import timezone
-from bemoSenderr.operations import SendAdminAlert
-from bemoSenderr.operations import TxLimitCumulOperations
+from bemosenderrr.operations import SendAdminAlert
+from bemosenderrr.operations import TxLimitCumulOperations
 
 
 """
 Signal to start funding transactions when the global transaction is created
 """
-@receiver(post_save, sender=GlobalTransaction)
-def start_funding_transaction(sender, instance, created, **kwargs):
+@receiver(post_save, senderr=GlobalTransaction)
+def start_funding_transaction(senderr, instance, created, **kwargs):
     if created and instance.status == GlobalTransactionStatus.new:
         instance.status = GlobalTransactionStatus.fundtransaction_in_progress
         instance.save()
@@ -40,11 +40,11 @@ def start_funding_transaction(sender, instance, created, **kwargs):
 """
 Signal to sync global transaction status (create an update mutation) to the datastore
 """
-@receiver(pre_save, sender=GlobalTransaction)
-def push_globaltx_status(sender, instance, **kwargs):
+@receiver(pre_save, senderr=GlobalTransaction)
+def push_globaltx_status(senderr, instance, **kwargs):
     try:
-        obj = sender.objects.get(pk=instance.pk)
-    except sender.DoesNotExist:
+        obj = senderr.objects.get(pk=instance.pk)
+    except senderr.DoesNotExist:
         print('Global transaction is new')
         # Object is new, so field hasn't technically changed
     else:
@@ -58,11 +58,11 @@ def push_globaltx_status(sender, instance, **kwargs):
 Signal to handle sending push notifications and sms when global transaction status changes
 """
 
-@receiver(pre_save, sender=GlobalTransaction)
-def handle_notifications(sender, instance, **kwargs):
+@receiver(pre_save, senderr=GlobalTransaction)
+def handle_notifications(senderr, instance, **kwargs):
     try:
-        obj = sender.objects.get(pk=instance.pk)
-    except sender.DoesNotExist:
+        obj = senderr.objects.get(pk=instance.pk)
+    except senderr.DoesNotExist:
         print('Global transaction is new')
         # Object is new, so field hasn't technically changed
     else:
@@ -70,7 +70,7 @@ def handle_notifications(sender, instance, **kwargs):
             logger.info('handle notifications !')
             try:
                 if instance.status == GlobalTransactionStatus.success:
-                    sender_name = str(instance.user_snapshot.get('first_name', "UNDEFINED"))
+                    senderr_name = str(instance.user_snapshot.get('first_name', "UNDEFINED"))
                     receiver_name = str(instance.receiver_snapshot.get('first_name', "UNDEFINED")) + " " + str(instance.receiver_snapshot.get('last_name', "UNDEFINED"))
                     currency_origin = Currency.objects.get(iso_code=instance.parameters.get('currency_origin'))
                     currency_destination = Currency.objects.get(iso_code=instance.parameters.get('currency_destination'))
@@ -80,27 +80,27 @@ def handle_notifications(sender, instance, **kwargs):
                     if not language:
                         language = "FR"
                     notif_service = NotificationsHandler()
-                    push_notif_data = notif_service.get_tx_collected_sender_push(lang=language, vars=[sender_name, receiver_name, amount_origin_currency, amount_destination_currency])
+                    push_notif_data = notif_service.get_tx_collected_senderr_push(lang=language, vars=[senderr_name, receiver_name, amount_origin_currency, amount_destination_currency])
                     pinpoint_service = PinpointWrapper()#SNSNotificationService()
                     user_snapshot = GlobalTransaction.objects.filter(user=instance.user).last().user_snapshot
                     status_push = pinpoint_service.send_push_notifications_and_data(status=GlobalTransactionStatus.success, user_snapshot=user_snapshot, user=instance.user, data=push_notif_data, type="transaction", global_tx_uuid=str(instance.uuid))
                     if status_push:
                         notifications_field = instance.notifications
-                        notifications_field['tx_collected_sender'] = True
+                        notifications_field['tx_collected_senderr'] = True
                         nb_rows = GlobalTransaction.objects.filter(uuid=instance.uuid).update(notifications=notifications_field)
-                        print('handle_notifications rows affected(tx_collected_sender) ', nb_rows)
-                    print("Status of handle_notifications (tx_collected_sender)", status_push)
+                        print('handle_notifications rows affected(tx_collected_senderr) ', nb_rows)
+                    print("Status of handle_notifications (tx_collected_senderr)", status_push)
             except Exception as e:
                 print(e.args)
             
 
 
-@receiver(pre_save, sender=GlobalTransaction)
-def handle_cancel_by_user(sender, instance, **kwargs):
+@receiver(pre_save, senderr=GlobalTransaction)
+def handle_cancel_by_user(senderr, instance, **kwargs):
     # Signal to cancel operation by user in frontend
     try:
-        obj = sender.objects.get(pk=instance.pk)
-    except sender.DoesNotExist:
+        obj = senderr.objects.get(pk=instance.pk)
+    except senderr.DoesNotExist:
         print('Global transaction is new')
         # Object is new, so field hasn't technically changed
     else:
@@ -158,8 +158,8 @@ def handle_cancel_by_user(sender, instance, **kwargs):
 """
 Signal to trigger collect transactions if funding transaction is SUCCESSFUL, otherwise FUNDING_ERROR (FINAL STATUS)
 """
-@receiver(post_save, sender=FundingTransaction)
-def start_collect_transactions(sender, instance, created, **kwargs):
+@receiver(post_save, senderr=FundingTransaction)
+def start_collect_transactions(senderr, instance, created, **kwargs):
 
     global_transaction = instance.globaltransaction_set.all().first()
     logger.info(instance.status)
@@ -192,12 +192,12 @@ def start_collect_transactions(sender, instance, created, **kwargs):
 """
 Signal to update global transaction status by evaluating the collect transaction(s) status
 """
-@receiver(pre_save, sender=CollectTransaction)
-def update_global_collect_status(sender, instance, **kwargs):
+@receiver(pre_save, senderr=CollectTransaction)
+def update_global_collect_status(senderr, instance, **kwargs):
     # Signal to cancel operation by user in frontend
     try:
-        obj = sender.objects.get(pk=instance.pk)
-    except sender.DoesNotExist:
+        obj = senderr.objects.get(pk=instance.pk)
+    except senderr.DoesNotExist:
         print('Collect transaction is new')
         # Object is new, so field hasn't technically changed
     else:
@@ -286,8 +286,8 @@ def update_global_collect_status(sender, instance, **kwargs):
 """
 Signal to delete funding transactions (cascade) when the linked global transaction is deleted.
 """
-@receiver(post_delete, sender=GlobalTransaction)
-def delete_funding_transaction(sender, instance, **kwargs):
+@receiver(post_delete, senderr=GlobalTransaction)
+def delete_funding_transaction(senderr, instance, **kwargs):
     periodic_task = PeriodicTasksEntry.objects.filter(
         name=f"Checking funding inactivity for {str(instance.funding_transaction.uuid)}").first()
     logger.info(f'DELETING PERIODIC TASK {periodic_task}')
@@ -300,8 +300,8 @@ def delete_funding_transaction(sender, instance, **kwargs):
 """
 Signal to delete the collect transaction(s) when the linked global transaction is deleted
 """
-@receiver(pre_delete, sender=GlobalTransaction)
-def delete_collect_transactions(sender, instance, **kwargs):
+@receiver(pre_delete, senderr=GlobalTransaction)
+def delete_collect_transactions(senderr, instance, **kwargs):
     for collect_transaction in instance.collect_transactions.all():
         
         periodic_task = PeriodicTasksEntry.objects.filter(
@@ -316,8 +316,8 @@ def delete_collect_transactions(sender, instance, **kwargs):
 """
 Signal to start kyc verification celery task (only works when there is an active kyc verification request partner and no status(null))
 """
-@receiver(post_save, sender=KycVerificationRequest)
-def start_kyc_verification(sender, instance, created, **kwargs):
+@receiver(post_save, senderr=KycVerificationRequest)
+def start_kyc_verification(senderr, instance, created, **kwargs):
     if not instance.status and instance.partner:
         api_config = instance.partner.api_config
         api_config['credentials'] = instance.partner.api_user.credentials
@@ -334,8 +334,8 @@ def start_kyc_verification(sender, instance, created, **kwargs):
 """
 Signal to start user bank verification request ()
 """
-@receiver(post_save, sender=UserBankVerificationRequest)
-def start_bank_verification(sender, instance, created, **kwargs):
+@receiver(post_save, senderr=UserBankVerificationRequest)
+def start_bank_verification(senderr, instance, created, **kwargs):
     """
     if not instance.status and instance.partner:
         api_config = instance.partner.api_config
@@ -360,15 +360,15 @@ def start_bank_verification(sender, instance, created, **kwargs):
 """
 Signal to sync appsettings config to datastore
 """
-@receiver(post_save, sender=AppSettings)
-def sync_appsettings(sender, instance, created, **kwargs):
+@receiver(post_save, senderr=AppSettings)
+def sync_appsettings(senderr, instance, created, **kwargs):
     sync_app_settings(instance)
 
 """
 Signal to handle celery-redbeat periodic tasks dynamically
 """
-@receiver(post_save, sender=PeriodicTasksEntry)
-def handle_periodic_task_admin(sender, instance, created, **kwargs):
+@receiver(post_save, senderr=PeriodicTasksEntry)
+def handle_periodic_task_admin(senderr, instance, created, **kwargs):
     entry = None
     try:
         entry = Entry.from_key(instance.key, app=app)
@@ -388,8 +388,8 @@ def handle_periodic_task_admin(sender, instance, created, **kwargs):
 """
 Signal to delete celery-redbeat  periodic tasks from django admin
 """
-@receiver(pre_delete, sender=PeriodicTasksEntry)
-def delete_periodic_task_entry_admin(sender, instance, using, **kwargs):
+@receiver(pre_delete, senderr=PeriodicTasksEntry)
+def delete_periodic_task_entry_admin(senderr, instance, using, **kwargs):
     entry = None
     try:
         entry = instance.get_entry()
@@ -399,11 +399,11 @@ def delete_periodic_task_entry_admin(sender, instance, using, **kwargs):
         instance.delete_periodic_task()
 
 
-@receiver(pre_save, sender=PeriodicTasksEntry)
-def update_task_schedule(sender, instance, **kwargs):
+@receiver(pre_save, senderr=PeriodicTasksEntry)
+def update_task_schedule(senderr, instance, **kwargs):
     try:
-        obj = sender.objects.get(pk=instance.pk)
-    except sender.DoesNotExist:
+        obj = senderr.objects.get(pk=instance.pk)
+    except senderr.DoesNotExist:
         print('Perioidc Task is new!')
         # Object is new, so field hasn't technically changed
     else:
@@ -415,15 +415,15 @@ def update_task_schedule(sender, instance, **kwargs):
             transaction.on_commit(lambda: instance.update_task()) 
 
 
-@receiver(post_save, sender=PartnerExchangeRate)
-def run_update_rates(sender, instance, created, **kwargs):
+@receiver(post_save, senderr=PartnerExchangeRate)
+def run_update_rates(senderr, instance, created, **kwargs):
     print("PartnerExchangeRate model changed, Running update rates")
     update_rates.apply_async()
 
 
 
-@receiver(post_save, sender=TransactionMethodAvailability)
-def update_collect_methods_availabilities(sender, instance, created, **kwargs):
+@receiver(post_save, senderr=TransactionMethodAvailability)
+def update_collect_methods_availabilities(senderr, instance, created, **kwargs):
     country = instance.partner.country
     print("Updating collect methods availibilities in ExchangeRateTiers")
     if country:
@@ -432,18 +432,18 @@ def update_collect_methods_availabilities(sender, instance, created, **kwargs):
             exchange_rate_tier.save()
 
 
-@receiver(post_save, sender=Country)
-def sync_updated_country(sender, instance, created, **kwargs):
+@receiver(post_save, senderr=Country)
+def sync_updated_country(senderr, instance, created, **kwargs):
     CountryService().sync_country(country=instance)
 
 
-@receiver(post_save, sender=Currency)
-def sync_updated_country(sender, instance, created, **kwargs):
+@receiver(post_save, senderr=Currency)
+def sync_updated_country(senderr, instance, created, **kwargs):
     CurrencyService().sync_currency(currency=instance)
 
 
-@receiver(post_save, sender=Partner)
-def update_collect_methods(sender, instance, created, **kwargs):
+@receiver(post_save, senderr=Partner)
+def update_collect_methods(senderr, instance, created, **kwargs):
     tx_methods_availabilities = TransactionMethodAvailability.objects.filter(partner=instance)
     if tx_methods_availabilities:
         for tx_method in tx_methods_availabilities:

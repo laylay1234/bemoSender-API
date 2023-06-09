@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0006_apirequestmonitoring'),
+        ('bemosenderrr', '0006_apirequestmonitoring'),
     ]
 
     operations = [

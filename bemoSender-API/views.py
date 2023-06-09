@@ -15,32 +15,32 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework_guardian.filters import ObjectPermissionsFilter
-from bemoSenderr.models.base import CollectTransactionStatus, GlobalTransactionStatus, PartnerStatus, PartnerType
-from bemoSenderr.models.global_transaction import GlobalTransaction
-from bemoSenderr.models.partner.bank_verification import UserBankVerificationRequest
-from bemoSenderr.models.partner.kyc_verification import KycVerificationRequest
-from bemoSenderr.models.partner.partner import Country, MobileNetworkAvailability, Partner, ExchangeRateTier, PartnerExchangeRate, UserTier
-from bemoSenderr.models.partner.services.apaylo_service import ApayloService
-from bemoSenderr.models.partner.services.dirham_service import DirhamService
-from bemoSenderr.models.partner.transactions import TxLimitCumul
-from bemoSenderr.models.task import PeriodicTasksEntry
-from bemoSenderr.utils.mutation_queries import UPDATE_USER_MUTATION
-from bemoSenderr.utils.pinpoint import PinpointWrapper
-from bemoSenderr.bemoSenderr_api.bemoSenderr_api import bemoSenderr_api
-from bemoSenderr.models.user import User, UserToken
+from bemosenderrr.models.base import CollectTransactionStatus, GlobalTransactionStatus, PartnerStatus, PartnerType
+from bemosenderrr.models.global_transaction import GlobalTransaction
+from bemosenderrr.models.partner.bank_verification import UserBankVerificationRequest
+from bemosenderrr.models.partner.kyc_verification import KycVerificationRequest
+from bemosenderrr.models.partner.partner import Country, MobileNetworkAvailability, Partner, ExchangeRateTier, PartnerExchangeRate, UserTier
+from bemosenderrr.models.partner.services.apaylo_service import ApayloService
+from bemosenderrr.models.partner.services.dirham_service import DirhamService
+from bemosenderrr.models.partner.transactions import TxLimitCumul
+from bemosenderrr.models.task import PeriodicTasksEntry
+from bemosenderrr.utils.mutation_queries import UPDATE_USER_MUTATION
+from bemosenderrr.utils.pinpoint import PinpointWrapper
+from bemosenderrr.bemosenderrr_api.bemosenderrr_api import bemosenderrr_api
+from bemosenderrr.models.user import User, UserToken
 from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
-from bemoSenderr.operations import TxLimitCumulOperations
-from bemoSenderr.serializers import UserSerializer
-from bemoSenderr.permissions import IsAPIUser, IsNotAPIUser, APIUserPermissionMixins
-from bemoSenderr.serializers.serializers import *
-from bemoSenderr.tasks import check_refunds, update_pending_sign_up_flinks, update_rates, check_deposits, authorize_deposits
+from bemosenderrr.operations import TxLimitCumulOperations
+from bemosenderrr.serializers import UserSerializer
+from bemosenderrr.permissions import IsAPIUser, IsNotAPIUser, APIUserPermissionMixins
+from bemosenderrr.serializers.serializers import *
+from bemosenderrr.tasks import check_refunds, update_pending_sign_up_flinks, update_rates, check_deposits, authorize_deposits
 from rest_framework import status
 import pprint
-from bemoSenderr.utils.appsync import make_client
-from bemoSenderr.services import sync_email_verification
-from bemoSenderr.utils.email_service import SCOPES, EmailService
+from bemosenderrr.utils.appsync import make_client
+from bemosenderrr.services import sync_email_verification
+from bemosenderrr.utils.email_service import SCOPES, EmailService
 from rest_framework.views import APIView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import authentication_classes, permission_classes
@@ -54,14 +54,14 @@ from rest_framework.decorators import action
 @api_view(['GET'])
 def index(request, format=None):
     index.cls.__doc__ = _("""
-    Welcome to [bemoSenderr][ref2].
+    Welcome to [bemosenderrr][ref2].
     
     This page returns a list of all API endpoints in the system.
 
     For more details on how to use this platform [see here][ref].
 
-    [ref2]: http://support.bemoSenderr.app
-    [ref]: https://bemoSenderr.dev/v1/redoc/
+    [ref2]: http://support.bemosenderrr.app
+    [ref]: https://bemosenderrr.dev/v1/redoc/
     """)
     # log(request.version)
     if request.user.is_staff:
@@ -76,10 +76,10 @@ def index(request, format=None):
                 'Check Refunds': reverse('check-refunds', request=request, format=format),
                 'Update Rates': reverse('update-rates', request=request, format=format),
                 'Get destination countries': reverse('get-destination-countries', request=request, format=format),
-                'Get charges by amount (bemoSenderr APP)': reverse('get-charges-by-amount', request=request, format=format),
-                'bemoSenderr API': reverse('bemoSenderr-api', request=request, format=format),
+                'Get charges by amount (bemosenderrr APP)': reverse('get-charges-by-amount', request=request, format=format),
+                'bemosenderrr API': reverse('bemosenderrr-api', request=request, format=format),
                 "Cancel a Global Transaction": reverse('cancel-global-transaction', request=request, format=format),
-                "Get Charges by amount (bemoSenderr website)":reverse('getChargesByAmount', request=request, format=format),
+                "Get Charges by amount (bemosenderrr website)":reverse('getChargesByAmount', request=request, format=format),
                 "Get Origin Countries":reverse('get-origin-countries', request=request, format=format),
                 "Get User Max Transaction Value":reverse('get-user-max-tx-value', request=request, format=format),
                 "Register User Device and Token":reverse('register-device', request=request, format=format),
@@ -104,10 +104,10 @@ def index(request, format=None):
                 'Check Refunds': reverse('check-refunds', request=request, format=format),
                 'Update Rates': reverse('update-rates', request=request, format=format),
                 'Get destination countries': reverse('get-destination-countries', request=request, format=format),
-                'Get charges by amount (bemoSenderr APP)': reverse('get-charges-by-amount', request=request, format=format),
-                'bemoSenderr API': reverse('bemoSenderr-api', request=request, format=format),
+                'Get charges by amount (bemosenderrr APP)': reverse('get-charges-by-amount', request=request, format=format),
+                'bemosenderrr API': reverse('bemosenderrr-api', request=request, format=format),
                 "Cancel a Global Transaction": reverse('cancel-global-transaction', request=request, format=format),
-                "Get Charges by amount (bemoSenderr website)":reverse('getChargesByAmount', request=request, format=format),
+                "Get Charges by amount (bemosenderrr website)":reverse('getChargesByAmount', request=request, format=format),
                 "Get Origin Countries":reverse('get-origin-countries', request=request, format=format),
                 "Get User Max Transaction Value":reverse('get-user-max-tx-value', request=request, format=format),
                 "Register User Device and Token":reverse('register-device', request=request, format=format),
@@ -613,21 +613,21 @@ class GetDestinationCountriesAPI(APIView):
             return Response({"response": "Missing request body!"}, status=status.HTTP_204_NO_CONTENT)
 
 
-class bemoSenderrAPI(APIView):
+class bemosenderrrAPI(APIView):
     permission_classes = [IsAuthenticated, IsAPIUser | IsAdminUser]
-    serializer_class = bemoSenderrAPISerializer
+    serializer_class = bemosenderrrAPISerializer
     def post(self, request, *args, **kwargs):
         try:
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid():
-                return bemoSenderr_api(request, dict(serializer.validated_data))
+                return bemosenderrr_api(request, dict(serializer.validated_data))
             else:
                 return Response({"response": "Missing or invalid request body!"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"response": "Missing or invalid request body!"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-from bemoSenderr.utils.email_verification import send_email, verify_token, verify_view
+from bemosenderrr.utils.email_verification import send_email, verify_token, verify_view
 
 
 class SendEmailVerificationAPI(APIView):
@@ -729,11 +729,11 @@ def send_welcome_email(user=None):
         "user_first_name": user.first_name
     }
     if str(user.locale).lower() == "fr":
-        html_message = render_to_string(os.path.join(os.getcwd(), 'bemoSenderr','templates', 'email', 'account_welcome_email_fr.html'), data)
-        subject = "Bienvenue chez bemoSenderr!"
+        html_message = render_to_string(os.path.join(os.getcwd(), 'bemosenderrr','templates', 'email', 'account_welcome_email_fr.html'), data)
+        subject = "Bienvenue chez bemosenderrr!"
     else:
-        html_message = render_to_string(os.path.join(os.getcwd(), 'bemoSenderr','templates', 'email', 'account_welcome_email_en.html'), data)
-        subject = "Welcome to bemoSenderr!"
+        html_message = render_to_string(os.path.join(os.getcwd(), 'bemosenderrr','templates', 'email', 'account_welcome_email_en.html'), data)
+        subject = "Welcome to bemosenderrr!"
     email = EmailMultiAlternatives(
                 subject,
                 "",
@@ -912,7 +912,7 @@ class RegisterUserDevice(APIView):
                 app_version = request_data.get('app_version', None)
                 time_zone = request_data.get('time_zone', None)
                 device_data = request_data.get('device_data', None)
-                gcm_senderid = request_data.get('gcm_senderid', None)
+                gcm_senderrid = request_data.get('gcm_senderrid', None)
                 app_identifier = request_data.get('app_identifier', None)
                 installation_id = request_data.get('installation_id', None)
                 last_user_token = None
@@ -926,7 +926,7 @@ class RegisterUserDevice(APIView):
                     last_user_token.device_token = device_token
                     last_user_token.app_version = app_version
                     last_user_token.time_zone = time_zone
-                    last_user_token.gcm_senderid = gcm_senderid
+                    last_user_token.gcm_senderrid = gcm_senderrid
                     last_user_token.device_data = device_data
                     last_user_token.app_identifier = app_identifier
                     last_user_token.installation_id = installation_id
@@ -938,7 +938,7 @@ class RegisterUserDevice(APIView):
                         device_type=device_type,
                         app_version=app_version,
                         time_zone=time_zone,
-                        gcm_senderid=gcm_senderid,
+                        gcm_senderrid=gcm_senderrid,
                         device_data=device_data,
                         app_identifier=app_identifier,
                         installation_id=installation_id
@@ -988,7 +988,7 @@ class GetChargesByAmountWebsiteAPI(APIView):
     permission_classes = [IsNotAPIUser, IsAuthenticated]
     serializer_class  = GetChargesByAmountForWebsiteSerializer
     __doc__ = _("""
-    API endpoint that gets charges by amount for the available and filtered countries(For the bemoSenderr website)
+    API endpoint that gets charges by amount for the available and filtered countries(For the bemosenderrr website)
     """)
     def post(self, request, *args, **kwargs):
         try:
@@ -1118,7 +1118,7 @@ class FlinksAPIView(RetrieveAPIView):
             url = settings.FLINKS_CA_BASE_URL
         if language == 'fr':
             url = f"{url}&language=fr"
-        url = f"{url}&termsNoCheckbox=true&customerName=bemoSenderr&termsUrl={urllib.parse.quote(terms_url, safe='')}"
+        url = f"{url}&termsNoCheckbox=true&customerName=bemosenderrr&termsUrl={urllib.parse.quote(terms_url, safe='')}"
         serializer = self.get_serializer(data={'iframe_url': url})
         serializer.is_valid(True)
         return Response(serializer.data)
@@ -1159,10 +1159,10 @@ class DisableUserAPI(APIView):
                                 "user_phone_number": user.phone_number
                             }
                             if str(user.locale).lower() == "fr":
-                                html_message = render_to_string(os.path.join(os.getcwd(), 'bemoSenderr','templates', 'email', 'account_blocked_email_fr.html'), data)
+                                html_message = render_to_string(os.path.join(os.getcwd(), 'bemosenderrr','templates', 'email', 'account_blocked_email_fr.html'), data)
                                 subject = "Compte suspendu"
                             else:
-                                html_message = render_to_string(os.path.join(os.getcwd(), 'bemoSenderr','templates', 'email', 'account_blocked_email_en.html'), data)
+                                html_message = render_to_string(os.path.join(os.getcwd(), 'bemosenderrr','templates', 'email', 'account_blocked_email_en.html'), data)
                                 subject = "Account Suspended"
                             email = EmailMultiAlternatives(
                                         subject,

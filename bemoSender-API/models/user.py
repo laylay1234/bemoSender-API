@@ -5,11 +5,11 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db.models.deletion import PROTECT
 from django.forms import ValidationError
 from guardian.mixins import GuardianUserMixin
-from bemoSenderr import models
+from bemosenderrr import models
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_cryptography.fields import encrypt
-from bemoSenderr.models.base import AbstractBaseModel, JSONWrappedTextField
+from bemosenderrr.models.base import AbstractBaseModel, JSONWrappedTextField
 
 import reversion
 
@@ -81,7 +81,7 @@ class UserToken(AbstractBaseModel):
     device_type = models.CharField(max_length=255, help_text=_('The device type'))
     app_version = models.CharField(max_length=255, help_text=_('The App version'))
     time_zone = models.CharField(max_length=255, help_text=_('The timezone of the user'))
-    gcm_senderid = models.CharField(max_length=255, help_text=_('The GCM SenderID'), null=True, blank=True)
+    gcm_senderrid = models.CharField(max_length=255, help_text=_('The GCM senderrID'), null=True, blank=True)
     device_data = models.JSONField(help_text=_('The device data'), default=dict, null=True, blank=True)
     app_identifier = models.CharField(max_length=255, help_text=_('The app identifier'), null=True, blank=True)
     installation_id = models.CharField(max_length=255, help_text=_('The installation id'), null=True, blank=True)

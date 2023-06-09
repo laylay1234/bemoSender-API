@@ -17,7 +17,7 @@ class CustomObjectPermissions(permissions.DjangoObjectPermissions):
     }
 
 """
-Permission class to prevent cognito / django non staff users from using the bemoSenderr API.
+Permission class to prevent cognito / django non staff users from using the bemosenderrr API.
 """
 class IsNotAPIUser(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -46,7 +46,7 @@ class APIUserPermissionMixins:
                 )
 
 """
-Permission class to allow API Partner Users using the bemoSenderr API
+Permission class to allow API Partner Users using the bemosenderrr API
 """
 class IsAPIUser(permissions.BasePermission):
 

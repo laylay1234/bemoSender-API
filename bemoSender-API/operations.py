@@ -1,9 +1,9 @@
 import datetime
 from loguru import logger
-from bemoSenderr.logger import send_email_celery_exception
-from bemoSenderr.models.partner.base import PartnerApiCallType
-from bemoSenderr.models.partner.partner import AppSettings, Country, Currency
-from bemoSenderr.models.base import CollectTransactionStatus, GlobalTransactionStatus, PartnerStatus, PartnerType
+from bemosenderrr.logger import send_email_celery_exception
+from bemosenderrr.models.partner.base import PartnerApiCallType
+from bemosenderrr.models.partner.partner import AppSettings, Country, Currency
+from bemosenderrr.models.base import CollectTransactionStatus, GlobalTransactionStatus, PartnerStatus, PartnerType
 from django.apps import apps
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -11,19 +11,19 @@ import os
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.utils import timezone
-from bemoSenderr.models.partner.services.apaylo_service import ApayloService
-from bemoSenderr.models.task import PeriodicTasksEntry
-from bemoSenderr.utils.notifications import NotificationsHandler
-from bemoSenderr.utils.pinpoint import PinpointWrapper
-from bemoSenderr.utils.s3 import upload_to_s3
+from bemosenderrr.models.partner.services.apaylo_service import ApayloService
+from bemosenderrr.models.task import PeriodicTasksEntry
+from bemosenderrr.utils.notifications import NotificationsHandler
+from bemosenderrr.utils.pinpoint import PinpointWrapper
+from bemosenderrr.utils.s3 import upload_to_s3
 from celery import shared_task, chain
 from pyvirtualdisplay import Display
 import pdfkit
 from dateutil.relativedelta import relativedelta
 from redbeat import RedBeatSchedulerEntry as Entry
-from bemoSenderr.celery import app
+from bemosenderrr.celery import app
 from django.conf import settings
-from bemoSenderr.models.partner.services.utils import getPaymentCode, getTransactionId
+from bemosenderrr.models.partner.services.utils import getPaymentCode, getTransactionId
 
 
 """
@@ -37,12 +37,12 @@ class SendMoney():
         time_now = datetime.datetime.strftime(timezone.now(), "%c")
         report = ''
         global_transaction = apps.get_model(
-            'bemoSenderr.GlobalTransaction').objects.filter(uuid=global_transaction_id).select_related("funding_transaction").first()
+            'bemosenderrr.GlobalTransaction').objects.filter(uuid=global_transaction_id).select_related("funding_transaction").first()
         report += str(global_transaction) + "\n" + " UUID : " + str(global_transaction_id) + "\n" "Global Transaction Status " + str(global_transaction.status) + '\n' 
         report += "Time :"+ time_now + "\n"
         report += "----------------------------------------------------------------------" + "\n"
         # Get funding operation instance
-        funding_operation = apps.get_model('bemoSenderr.FundingTransaction').objects.get(
+        funding_operation = apps.get_model('bemosenderrr.FundingTransaction').objects.get(
             uuid=global_transaction.funding_transaction.uuid)
         report += "Starting Funding Transaction" + "\n"
         report += "----------------------------------------------------------------------" + "\n"
@@ -61,17 +61,17 @@ class SendMoney():
             e = Entry.from_key(key=f"redbeat:Checking funding inactivity for {str(funding_operation.uuid)}", app=app)
             logger.info("Funding Transaction Inactivity periodic task Exists ! ")
             # Periodic task object to manage redbeat periodic tasks(entries) dynamically)
-            periodic_task, created = PeriodicTasksEntry.objects.get_or_create(key=e.key, task="bemoSenderr.models.partner.transactions.check_funding_inactivity",
+            periodic_task, created = PeriodicTasksEntry.objects.get_or_create(key=e.key, task="bemosenderrr.models.partner.transactions.check_funding_inactivity",
                             name=e.name, schedule=900, args=[str(funding_operation.uuid)]
             )
             periodic_task.save()
         except Exception as e:
             e = Entry(schedule=900, name=f"Checking funding inactivity for {str(funding_operation.uuid)}", app=app,
-                    task="bemoSenderr.models.partner.transactions.check_funding_inactivity", args=[str(funding_operation.uuid)])
+                    task="bemosenderrr.models.partner.transactions.check_funding_inactivity", args=[str(funding_operation.uuid)])
             e.save()
             logger.info("Funding Transaction Inactivity periodic task is NEW ! ")
             # Periodic task object to manage redbeat periodic tasks(entries) dynamically)
-            periodic_task, created = PeriodicTasksEntry.objects.get_or_create(key=e.key, task="bemoSenderr.models.partner.transactions.check_funding_inactivity",
+            periodic_task, created = PeriodicTasksEntry.objects.get_or_create(key=e.key, task="bemosenderrr.models.partner.transactions.check_funding_inactivity",
                                                                             name=e.name, schedule=900, args=[str(funding_operation.uuid)]
                                                                             )
             periodic_task.save()
@@ -83,7 +83,7 @@ class SendMoney():
         report = ''
         time_now = datetime.datetime.strftime(timezone.now(), "%c")
         global_transaction = apps.get_model(
-            'bemoSenderr.GlobalTransaction').objects.filter(uuid=global_transaction_id).prefetch_related("collect_transactions", "collect_transactions__partner").first()
+            'bemosenderrr.GlobalTransaction').objects.filter(uuid=global_transaction_id).prefetch_related("collect_transactions", "collect_transactions__partner").first()
         report += str(global_transaction) + "\n" + " UUID : " + str(global_transaction_id) + "\n" "Global Transaction Status " + str(global_transaction.status) + '\n' 
         report += "Time :"+ time_now + "\n"
         collect_operations = global_transaction.collect_transactions.all()
@@ -110,7 +110,7 @@ class SendMoney():
             task = collect_operation.collect.si(global_transaction_id, collect_uuid, api_config, collect_code, dirham_transaction_code)
             collect_tasks.append(task)
         # Create a celery group in case of a country having multiple Partners. 
-        from bemoSenderr.tasks import send_invoice_task
+        from bemosenderrr.tasks import send_invoice_task
         g = chain(collect_tasks) #Celery Group of the collect transactions.
         g.link(send_invoice_task.si((str(global_transaction_id)))) # Attach callback function to send the invoice and sync the collect_codes.
         result = g() # Start the tasks (equivalent to g.apply_async())   
@@ -120,7 +120,7 @@ class SendMoney():
     @logger.catch
     def refund_transfer(self, instance_uuid=None):
         try:
-            partner = apps.get_model("bemoSenderr.Partner").objects.filter(type=PartnerType.funding, status=PartnerStatus.active).select_related('api_user').first()
+            partner = apps.get_model("bemosenderrr.Partner").objects.filter(type=PartnerType.funding, status=PartnerStatus.active).select_related('api_user').first()
             api_config = None
             auto_refund = False
             if partner:
@@ -134,7 +134,7 @@ class SendMoney():
                 apaylo = partner
                 api_config = apaylo.api_config
                 api_config['credentials'] = apaylo.api_user.credentials
-                collect_instance = apps.get_model("bemoSenderr.CollectTransaction").objects.get(uuid=instance_uuid)
+                collect_instance = apps.get_model("bemosenderrr.CollectTransaction").objects.get(uuid=instance_uuid)
                 instance = collect_instance.globaltransaction_set.all().first()
                 response = ApayloService().refund_interac_transfer(api_config=api_config, instance_uuid=str(instance.uuid))
                 if response and response.get('StatusCode', None) == 200 and response.get('IsError', True) == False:
@@ -170,7 +170,7 @@ class SendInvoice():
             SendAdminAlert().send_admin_collect_tx_sent(global_tx)
         """
         ---------------------------------------------------------------------------------------------------------------------
-        Send Push notification to (Sender) and sms to (Receiver)
+        Send Push notification to (senderr) and sms to (Receiver)
         ---------------------------------------------------------------------------------------------------------------------
         """
         
@@ -181,7 +181,7 @@ class SendInvoice():
                 currency_destination = Currency.objects.get(iso_code=global_tx.parameters.get('currency_destination'))
                 amount_origin_currency = str(global_tx.parameters.get('amount_origin', "UNDEFINED")) + " " + currency_origin.short_sign
                 amount_destination_currency = str(global_tx.parameters.get('amount_destination', "UNDEFINED")) + " " + currency_destination.short_sign
-                sender_name = str(global_tx.user_snapshot.get('first_name', "UNDEFINED")) + " " + str(global_tx.user_snapshot.get('last_name', "UNDEFINED"))
+                senderr_name = str(global_tx.user_snapshot.get('first_name', "UNDEFINED")) + " " + str(global_tx.user_snapshot.get('last_name', "UNDEFINED"))
                 receiver_name = str(global_tx.receiver_snapshot.get('first_name', "UNDEFINED")) + " " + str(global_tx.receiver_snapshot.get('last_name', "UNDEFINED"))
                 receiver_phone_number = str(global_tx.receiver_snapshot.get('phone_number', "UNDEFINED"))
                 country_destination = Country.objects.get(iso_code=global_tx.parameters.get('destination_country'))
@@ -197,9 +197,9 @@ class SendInvoice():
                 language = user.locale
                 if not language:
                     language = "FR"
-                push_notif_data = notif_service.get_tx_collect_ready_sender_push(lang=language, vars=[amount_origin_currency, amount_destination_currency, receiver_name, receiver_phone_number])
+                push_notif_data = notif_service.get_tx_collect_ready_senderr_push(lang=language, vars=[amount_origin_currency, amount_destination_currency, receiver_name, receiver_phone_number])
                 logger.info('THIS IS THE USERSNAPSHOT OF THE LATEST GLOBALTRANSACTION')
-                user_snapshot = apps.get_model('bemoSenderr.GlobalTransaction').objects.filter(user=global_tx.user).last().user_snapshot
+                user_snapshot = apps.get_model('bemosenderrr.GlobalTransaction').objects.filter(user=global_tx.user).last().user_snapshot
                 logger.info(user_snapshot)
                 status_push = pinpoint_service.send_push_notifications_and_data(status=global_tx.status, user_snapshot=user_snapshot, user=user, data=push_notif_data, type="transaction", global_tx_uuid=str(global_tx.uuid))
                 admin_phone_numbers = notif_service.get_staff_users_phone_numbers()
@@ -233,7 +233,7 @@ class SendInvoice():
                     for collect_tx in collect_transactions:
                         partners += f"{str(collect_tx.partner.display_name)}:\n{str(collect_tx.collect_code)}\n"
                     print(partners)
-                    sms_notif_data = notif_service.get_tx_collect_cash_ready_receiver_sms(lang=lang_receiver, vars=[sender_name, amount_destination_currency, partners, country_destination.name_fr, client_support])
+                    sms_notif_data = notif_service.get_tx_collect_cash_ready_receiver_sms(lang=lang_receiver, vars=[senderr_name, amount_destination_currency, partners, country_destination.name_fr, client_support])
                     print(sms_notif_data)
                     #TODO Check where to get origination number
                     status_sms = pinpoint_service.send_sms(destination_number=receiver_phone_number, origination_number="+123", message=sms_notif_data)
@@ -242,14 +242,14 @@ class SendInvoice():
                 elif "bank" in str(collect_method).lower():
                     account_number = global_tx.receiver_snapshot.get('account_number', "UNDEFINED")
                     swift_code = global_tx.receiver_snapshot.get('swift_code', "UNDEFINED")
-                    app_name = "bemoSenderr" #TODO is this gonna remain hardcoded or not ?
-                    sms_notif_data = notif_service.get_tx_collect_bank_ready_receiver_sms(lang=lang_receiver, vars=[sender_name, amount_destination_currency, account_number, swift_code])
+                    app_name = "bemosenderrr" #TODO is this gonna remain hardcoded or not ?
+                    sms_notif_data = notif_service.get_tx_collect_bank_ready_receiver_sms(lang=lang_receiver, vars=[senderr_name, amount_destination_currency, account_number, swift_code])
                     #TODO Check where to get origination number
                     print(sms_notif_data)
                     status_sms = pinpoint_service.send_sms(destination_number=receiver_phone_number, origination_number="+123", message=sms_notif_data)
                     logger.info(f"SMS STATUS : {status_sms}")
                 if status_push:
-                    global_tx.notifications['tx_collect_ready_sender'] = True
+                    global_tx.notifications['tx_collect_ready_senderr'] = True
                 if status_sms:
                     global_tx.notifications['tx_collect_ready_receiver'] = True
                 global_tx.save()
@@ -260,7 +260,7 @@ class SendInvoice():
         ---------------------------------------------------------------------------------------------------
         """
         with logger.catch(onerror=send_email_celery_exception):
-            subject = f'bemoSenderr Invoice {global_tx.invoice_number}'
+            subject = f'bemosenderrr Invoice {global_tx.invoice_number}'
             collect_transactions = global_tx.collect_transactions.all()
             user_snapshot = global_tx.user_snapshot
             receiver_snapshot = global_tx.receiver_snapshot
@@ -273,23 +273,23 @@ class SendInvoice():
             destination_lowest_amount = format(float(parameters['amount_destination']) / float(parameters['amount_origin']), ".2f")
             time_now = datetime.datetime.strftime(timezone.now(), "%b %d, %Y")
             data = {
-                    'sender_phone_number': user_snapshot['phone_number'],
+                    'senderr_phone_number': user_snapshot['phone_number'],
                     'invoice_number': global_tx.invoice_number,
-                    'sender_first_name': str(user_snapshot['first_name']).upper(),
-                    'sender_last_name': str(user_snapshot['last_name']).upper(),
+                    'senderr_first_name': str(user_snapshot['first_name']).upper(),
+                    'senderr_last_name': str(user_snapshot['last_name']).upper(),
                     'invoice_date': time_now,
-                    'sender_address_1': user_snapshot['address_1'],
-                    'sender_state': user_snapshot['state'],
-                    'sender_zip_code': user_snapshot['zip_code'],
+                    'senderr_address_1': user_snapshot['address_1'],
+                    'senderr_state': user_snapshot['state'],
+                    'senderr_zip_code': user_snapshot['zip_code'],
                     'user_city': str(user_snapshot['city']).upper(),
                     'user_country': origin_country.name,
-                    'sender_total_amount': format(float(parameters['total']), '.2f'),
-                    'sender_email': user_snapshot['email'],
+                    'senderr_total_amount': format(float(parameters['total']), '.2f'),
+                    'senderr_email': user_snapshot['email'],
                     'origin_country_name': origin_country.name,
                     'destination_country_name': destination_country.name,
-                    'sender_converted_amount': format(float(parameters['amount_destination']), ".2f"),
+                    'senderr_converted_amount': format(float(parameters['amount_destination']), ".2f"),
                     'origin_currency_sign': origin_currency.sign,
-                    'sender_origin_currency': origin_currency.iso_code,
+                    'senderr_origin_currency': origin_currency.iso_code,
                     'destination_lowest_amount': destination_lowest_amount,
                     'origin_currency_short_sign': origin_currency.short_sign,
                     'delivery_method_fee': parameters['fee'],
@@ -301,10 +301,10 @@ class SendInvoice():
                     'collect_transactions': collect_transactions
 
             }
-            html_message = render_to_string(os.path.join(os.getcwd(), 'bemoSenderr','templates', 'email', 'invoice.html'), data)
+            html_message = render_to_string(os.path.join(os.getcwd(), 'bemosenderrr','templates', 'email', 'invoice.html'), data)
             plain_message = strip_tags(html_message)
             from_email = f'From <{settings.SERVER_EMAIL}>'
-            to = 'bemoSenderr.test@gmail.com'
+            to = 'bemosenderrr.test@gmail.com'
             admin_emails = NotificationsHandler().get_staff_users_emails()
             if admin_emails:
                 if to in admin_emails:
@@ -319,7 +319,7 @@ class SendInvoice():
             
             email = EmailMultiAlternatives(
                 subject,
-                f'bemoSenderr Invoice {global_tx.invoice_number}',
+                f'bemosenderrr Invoice {global_tx.invoice_number}',
                 str(settings.SERVER_EMAIL),
                 admin_emails,
             )
@@ -348,7 +348,7 @@ class SendInvoice():
                 env = "dev"
             else:
                 env = "prod"
-            upload_to_s3(body=pdf, bucket='v3-invoicing', key=f"{env}/bemoSenderr Invoice {global_tx.invoice_number} {time_now}.pdf", content_type='application/pdf')
+            upload_to_s3(body=pdf, bucket='v3-invoicing', key=f"{env}/bemosenderrr Invoice {global_tx.invoice_number} {time_now}.pdf", content_type='application/pdf')
         
 
 class SendAdminAlert():
@@ -419,8 +419,8 @@ class SendAdminAlert():
             "tx_method": transaction_method,
             "receiver_mobile_money": receiver_mobile_money
         }
-        html_message = render_to_string(os.path.join(os.getcwd(), 'bemoSenderr','templates', 'email', 'admin_alert_trx_sent.html'), data)
-        to = 'bemoSenderr.test@gmail.com'
+        html_message = render_to_string(os.path.join(os.getcwd(), 'bemosenderrr','templates', 'email', 'admin_alert_trx_sent.html'), data)
+        to = 'bemosenderrr.test@gmail.com'
         admin_emails = NotificationsHandler().get_staff_users_emails()
         if admin_emails:
             if to in admin_emails:
@@ -486,8 +486,8 @@ class SendAdminAlert():
                 "collect_code": collect_code,
                 "user_data": user_data
             }
-            html_message = render_to_string(os.path.join(os.getcwd(), 'bemoSenderr','templates', 'email', 'admin_alert_trx_collected.html'), data)
-            to = 'bemoSenderr.test@gmail.com'
+            html_message = render_to_string(os.path.join(os.getcwd(), 'bemosenderrr','templates', 'email', 'admin_alert_trx_collected.html'), data)
+            to = 'bemosenderrr.test@gmail.com'
             admin_emails = NotificationsHandler().get_staff_users_emails()
             if admin_emails:
                 if to in admin_emails:
@@ -515,7 +515,7 @@ class TxLimitCumulOperations():
     def on_send_money(self, global_tx=None):
         logger.info("Send money tx_limit_cumul operation")
         try:
-            tx_limit_cumul_model = apps.get_model("bemoSenderr.TxLimitCumul")
+            tx_limit_cumul_model = apps.get_model("bemosenderrr.TxLimitCumul")
             user = global_tx.user
             tx_amount = global_tx.parameters.get("amount_origin", "UNDEFINED")
             cumulative_debut = limit_1_month = last_1_month_refresh = limit_3_month = last_3_month_refresh = limit_12_month = last_12_month_refresh = total_transfered_amount = None
@@ -568,7 +568,7 @@ class TxLimitCumulOperations():
     def on_refund_money(self, global_tx=None, operation="", refund_with_fees=False):
         logger.info("Refund tx_limit_cumul operation")
         try:
-            tx_limit_cumul_model = apps.get_model("bemoSenderr.TxLimitCumul")
+            tx_limit_cumul_model = apps.get_model("bemosenderrr.TxLimitCumul")
             user = global_tx.user
             tx_amount = global_tx.parameters.get("amount_origin", "UNDEFINED")
             cumulative_debut = limit_1_month = last_1_month_refresh = limit_3_month = last_3_month_refresh = limit_12_month = last_12_month_refresh = total_transfered_amount = None
@@ -625,7 +625,7 @@ class TxLimitCumulOperations():
     def on_reset_limit(self, user=None):
         
         try:
-            tx_limit_cumul_model = apps.get_model("bemoSenderr.TxLimitCumul")
+            tx_limit_cumul_model = apps.get_model("bemosenderrr.TxLimitCumul")
             limit_1_month = last_1_month_refresh = limit_3_month = last_3_month_refresh = limit_12_month = last_12_month_refresh = None
             last_tx_limit_cumul = tx_limit_cumul_model.objects.filter(user=user).order_by("-created_at").first()
             if not last_tx_limit_cumul:

@@ -2,8 +2,8 @@ import copy
 from datetime import timedelta
 from django.db import models
 from loguru import logger
-from bemoSenderr.models.base import AbstractBaseModel, PartnerStatus, PartnerType, TransactionTypes
-from bemoSenderr.models.partner.base import PartnerApiCallType
+from bemosenderrr.models.base import AbstractBaseModel, PartnerStatus, PartnerType, TransactionTypes
+from bemosenderrr.models.partner.base import PartnerApiCallType
 from django.core.exceptions import ValidationError
 import json
 from django.utils.translation import ugettext_lazy as _
@@ -254,7 +254,7 @@ class ExchangeRateTier(AbstractBaseModel):
     bottom_amount = models.PositiveIntegerField(help_text='Minimum value of this rate tier')
     distribution_percentage = models.CharField(max_length=255, help_text='The percentage of transactions in this rate tier')
     profit_margin_percentage = models.CharField(max_length=255,
-                                                help_text='Sales commission per transaction for bemoSenderr')  # TODO rename this properly (sales commission for bemoSenderr)
+                                                help_text='Sales commission per transaction for bemosenderrr')  # TODO rename this properly (sales commission for bemosenderrr)
     applicable_rate = models.CharField(max_length=255, help_text='calculataed exchange rate available to the client based on ratetier level')
     collect_transaction_method_fees = models.JSONField(help_text='Fees related to the delivery method', null=True, blank=True)
 

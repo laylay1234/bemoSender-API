@@ -3,5 +3,5 @@ Hi {{userFullName}},
 For compliance reasons, your account associated with the following phone number has been suspended.
 Phone number: {{username}}
 
-bemoSenderr
-https://bemoSenderr.com
+bemosenderrr
+https://bemosenderrr.com

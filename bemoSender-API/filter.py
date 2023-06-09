@@ -1,6 +1,6 @@
 from django_filters.rest_framework import FilterSet
 
-from bemoSenderr.models import CustomField, User
+from bemosenderrr.models import CustomField, User
 
 
 class UserFilter(FilterSet):

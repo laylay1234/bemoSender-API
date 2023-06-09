@@ -12,7 +12,7 @@ from rest_framework.renderers import SchemaJSRenderer
 from rest_framework.schemas import get_schema_view
 from rest_framework_nested import routers
 
-from bemoSenderr import views
+from bemosenderrr import views
 
 
 router = routers.SimpleRouter()
@@ -29,17 +29,17 @@ urlpatterns = [
     url(r'^__debug__/', include(debug_toolbar.urls)),
     path("index.html", views.index,),
     path("", views.index,),
-    path('v1/', include((router.urls, 'bemoSenderr'), namespace='v1')),
-    re_path('^(?P<version>(v1|v2))/docs/', include_docs_urls(title="bemoSenderr API")),
+    path('v1/', include((router.urls, 'bemosenderrr'), namespace='v1')),
+    re_path('^(?P<version>(v1|v2))/docs/', include_docs_urls(title="bemosenderrr API")),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url('^v1/rest-auth/', include('dj_rest_auth.urls')),
     path('v1/me', views.UserProfileAPI.as_view(), name='user-detail'),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('openapi', get_schema_view(title="bemoSenderr", description="Exploit your data, not the planet", version="0.9.0"), name='openapi-schema'),
+    path('openapi', get_schema_view(title="bemosenderrr", description="Exploit your data, not the planet", version="0.9.0"), name='openapi-schema'),
     url('^v1/swagger-ui/', TemplateView.as_view(template_name='swagger-ui.html', extra_context={'schema_url':'openapi-schema'}), name='swagger-ui'),
     url('^v1/redoc/', TemplateView.as_view( template_name='redoc.html', extra_context={'schema_url': 'openapi-schema'}), name='redoc'),
     path('jsi18n/', cache_page(3600, key_prefix='js18n1')(JSONCatalog.as_view()), name='javascript-catalog'),
-    url(r'(?P<version>(v[0-9]|))docs/schema.js', cache_page(3600, key_prefix='js18n2')(get_schema_view(title='The bemoSenderr Platform API',
+    url(r'(?P<version>(v[0-9]|))docs/schema.js', cache_page(3600, key_prefix='js18n2')(get_schema_view(title='The bemosenderrr Platform API',
                                                                                     description="Abuse your data, not the planet",
                                                                                     version="0.2.0",
                                                                                     renderer_classes=[SchemaJSRenderer])),
@@ -53,7 +53,7 @@ urlpatterns = [
     path('v1/get-charges-by-amount', views.GetChargerByAmountAPI.as_view(), name="get-charges-by-amount"),
     path('v1/get-destination-countries', views.GetDestinationCountriesAPI.as_view(), name="get-destination-countries"),
     path('v1/user-tiers', views.UserTierAPI.as_view(), name="user-tiers"),
-    path('v1/bemoSenderr-api', views.bemoSenderrAPI.as_view(), name="bemoSenderr-api"),
+    path('v1/bemosenderrr-api', views.bemosenderrrAPI.as_view(), name="bemosenderrr-api"),
     path('v1/email-verification/<str:token>/', views.confirm_email, name="email-verification"),
     path('v1/send-email', views.SendEmailVerificationAPI.as_view(), name="send-email"),
     path('v1/cancel-global-transaction', views.CancelGlobalTransactionAPI.as_view(), name="cancel-global-transaction"),

@@ -1,9 +1,9 @@
 from loguru import logger
 import requests
 import json
-from bemoSenderr.models.base import CollectTransactionStatus
-from bemoSenderr.models.partner.partner import Country
-from bemoSenderr.models.partner.services.utils import getTransactionId
+from bemosenderrr.models.base import CollectTransactionStatus
+from bemosenderrr.models.partner.partner import Country
+from bemosenderrr.models.partner.services.utils import getTransactionId
 from django.apps import apps
 
 class DamaneService():
@@ -35,7 +35,7 @@ class DamaneService():
             damaneTxId = getTransactionId(9)
             request_id = "yx" + str(collect_uuid)
             collect_transaction_model = apps.get_model(
-                'bemoSenderr', 'CollectTransaction')
+                'bemosenderrr', 'CollectTransaction')
             instance = collect_transaction_model.objects.get(uuid=collect_uuid)
             delivery_method = instance.globaltransaction_set.all().first().collect_method
             if "cash" in str(delivery_method).lower():
@@ -52,23 +52,23 @@ class DamaneService():
             }
             destinationCurrencyCode = instance.globaltransaction_set.all(
             ).first().parameters['currency_destination']
-            senderIdentificationDocument = user_snapshot['document']['type']
-            if str(senderIdentificationDocument).lower() in 'passport':
-                senderIdentificationDocument = 'INTERNATIONAL_PASSEPORT'
-            elif str(senderIdentificationDocument).lower() in str("Driver's license").lower():
-                senderIdentificationDocument = "DRIVING_LICENCE"
-            elif str(senderIdentificationDocument).lower() in str('ID card').lower():
-                senderIdentificationDocument = 'NATIONAL_ID_CARD'
-            elif str(senderIdentificationDocument).lower() in str('Others').lower():
+            senderrIdentificationDocument = user_snapshot['document']['type']
+            if str(senderrIdentificationDocument).lower() in 'passport':
+                senderrIdentificationDocument = 'INTERNATIONAL_PASSEPORT'
+            elif str(senderrIdentificationDocument).lower() in str("Driver's license").lower():
+                senderrIdentificationDocument = "DRIVING_LICENCE"
+            elif str(senderrIdentificationDocument).lower() in str('ID card').lower():
+                senderrIdentificationDocument = 'NATIONAL_ID_CARD'
+            elif str(senderrIdentificationDocument).lower() in str('Others').lower():
                 pass
-            elif str(senderIdentificationDocument).lower() in str('O').lower():
-                senderIdentificationDocument = 'FOREIGNER_ID_CARD'
+            elif str(senderrIdentificationDocument).lower() in str('O').lower():
+                senderrIdentificationDocument = 'FOREIGNER_ID_CARD'
             else:
-                senderIdentificationDocument = 'FOREIGNER_ID_CARD'
+                senderrIdentificationDocument = 'FOREIGNER_ID_CARD'
             # TODO parse user_data to variables
-            sender_phone_number = str(user_snapshot['phone_number'])
-            if sender_phone_number[0] == '+':
-                sender_phone_number = sender_phone_number.replace('+', '00')
+            senderr_phone_number = str(user_snapshot['phone_number'])
+            if senderr_phone_number[0] == '+':
+                senderr_phone_number = senderr_phone_number.replace('+', '00')
             receiver_phone_number = str(user_snapshot['phone_number'])
             if receiver_phone_number[0] == '+':
                 receiver_phone_number = receiver_phone_number.replace('+', '00')
@@ -80,21 +80,21 @@ class DamaneService():
                     "VARIABLE1": str(damaneTxId),  # transaction_id
                     # Amount in MAD
                     "VARIABLE2": parameters['amount_destination'],
-                    # (MME or MR) Title of the sender
+                    # (MME or MR) Title of the senderr
                     "VARIABLE3": "MR" if (user_snapshot['gender'] == 'Male') else 'MME',
                     "VARIABLE4": user_snapshot['first_name'],
                     "VARIABLE5": "",
                     "VARIABLE6": user_snapshot['last_name'],
                     "VARIABLE7": "",
-                    "VARIABLE8": sender_phone_number,
-                    "VARIABLE9": "Montreal",  # Sender address 1
+                    "VARIABLE8": senderr_phone_number,
+                    "VARIABLE9": "Montreal",  # senderr address 1
                     "VARIABLE10": "",
                     "VARIABLE11": "H1H1H1",
-                    "VARIABLE12": "Montreal",  # Sender city name
+                    "VARIABLE12": "Montreal",  # senderr city name
                     "VARIABLE13": user_country,  # ISO CODE
-                    # Sender identificatio document type (FOREIGNER_ID_CARD, NATIONAL_ID_CARD, INTERNATIONAL_PASSEPORT, DRIVING_LICENCE)
-                    "VARIABLE14": senderIdentificationDocument,
-                    # Sender Identification document number
+                    # senderr identificatio document type (FOREIGNER_ID_CARD, NATIONAL_ID_CARD, INTERNATIONAL_PASSEPORT, DRIVING_LICENCE)
+                    "VARIABLE14": senderrIdentificationDocument,
+                    # senderr Identification document number
                     "VARIABLE15": user_snapshot['document']['number'],
                     # (MME or MR) Title of the receiver
                     "VARIABLE16": "MR" if (receiver_snapshot['gender'] == 'Male') else 'MME',

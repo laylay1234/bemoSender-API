@@ -2,13 +2,13 @@
 
 from django.db import migrations, models
 import django_cryptography.fields
-import bemoSenderr.models.user
+import bemosenderrr.models.user
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0027_auto_20220629_1501'),
+        ('bemosenderrr', '0027_auto_20220629_1501'),
     ]
 
     operations = [
@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='credentials',
-            field=django_cryptography.fields.encrypt(bemoSenderr.models.user.JSONWrappedTextField(blank=True, default={}, null=True)),
+            field=django_cryptography.fields.encrypt(bemosenderrr.models.user.JSONWrappedTextField(blank=True, default={}, null=True)),
         ),
         migrations.AlterField(
             model_name='collecttransaction',

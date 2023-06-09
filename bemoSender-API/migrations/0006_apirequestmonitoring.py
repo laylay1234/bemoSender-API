@@ -9,7 +9,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0005_alter_apicollecttoken_expires_at'),
+        ('bemosenderrr', '0005_alter_apicollecttoken_expires_at'),
     ]
 
     operations = [

@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 import uuid
-from bemoSenderr.models.base import AbstractBaseModel
-from bemoSenderr.types import STATUS_TYPES
-from bemoSenderr.celery import app
+from bemosenderrr.models.base import AbstractBaseModel
+from bemosenderrr.types import STATUS_TYPES
+from bemosenderrr.celery import app
 from redbeat import RedBeatSchedulerEntry as Entry
 from celery.schedules import schedule
 

@@ -1,12 +1,12 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from loguru import logger
-from bemoSenderr.models.base import AbstractBaseModel, CollectTransactionStatus, FundingTransactionStatus, GlobalTransactionStatus, PartnerStatus, PartnerType
-from bemoSenderr.models.partner.partner import Country, MobileNetwork, MobileNetworkAvailability, Partner, PartnerExchangeRate, PartnerSettlementAccount, TransactionMethod, TransactionMethodAvailability
+from bemosenderrr.models.base import AbstractBaseModel, CollectTransactionStatus, FundingTransactionStatus, GlobalTransactionStatus, PartnerStatus, PartnerType
+from bemosenderrr.models.partner.partner import Country, MobileNetwork, MobileNetworkAvailability, Partner, PartnerExchangeRate, PartnerSettlementAccount, TransactionMethod, TransactionMethodAvailability
 from django.forms.models import model_to_dict
-from bemoSenderr.models.partner.transactions import CollectTransaction, FundingTransaction
+from bemosenderrr.models.partner.transactions import CollectTransaction, FundingTransaction
 from django_fsm import FSMField
-from bemoSenderr.models.transitions import GlobalTransactionTransitions
+from bemosenderrr.models.transitions import GlobalTransactionTransitions
 
 class GlobalTransaction(AbstractBaseModel, GlobalTransactionTransitions):
     user = models.ForeignKey('User', help_text=_('Associated user'), on_delete=models.RESTRICT, null=True, blank=True)
@@ -35,8 +35,8 @@ class GlobalTransaction(AbstractBaseModel, GlobalTransactionTransitions):
                 self.invoice_number = 1
         if self.notifications is None:
             self.notifications = {
-                "tx_collect_ready_sender": False,
-                "tx_collected_sender": False,
+                "tx_collect_ready_senderr": False,
+                "tx_collected_senderr": False,
                 "tx_collect_ready_receiver": False
             }
         instance = super(GlobalTransaction, self).save(force_insert, force_update, *args, **kwargs)

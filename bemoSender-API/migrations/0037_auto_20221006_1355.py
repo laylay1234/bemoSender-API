@@ -7,7 +7,7 @@ import django_fsm
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0036_auto_20220916_1055'),
+        ('bemosenderrr', '0036_auto_20220916_1055'),
     ]
 
     operations = [

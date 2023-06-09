@@ -8,7 +8,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0031_auto_20220714_1410'),
+        ('bemosenderrr', '0031_auto_20220714_1410'),
     ]
 
     operations = [
@@ -37,8 +37,8 @@ class Migration(migrations.Migration):
                 ('_version', models.CharField(blank=True, help_text='Datatstore version used in mutations', max_length=255, null=True)),
                 ('name', models.CharField(help_text='The mobile network name', max_length=255)),
                 ('active', models.BooleanField(help_text='Mobile Network availbility')),
-                ('country', models.ForeignKey(help_text='Destination country', on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.country')),
-                ('mobile_network', models.ForeignKey(help_text='The mobile network', on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.mobilenetwork')),
+                ('country', models.ForeignKey(help_text='Destination country', on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.country')),
+                ('mobile_network', models.ForeignKey(help_text='The mobile network', on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.mobilenetwork')),
             ],
             options={
                 'verbose_name_plural': 'Mobile Networks Availabilities',

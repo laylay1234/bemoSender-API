@@ -1,9 +1,9 @@
 from loguru import logger
 import requests
 import json
-from bemoSenderr.models.base import CollectTransactionStatus
-from bemoSenderr.models.partner.partner import Country, PartnerSettlementAccount
-from bemoSenderr.models.partner.services.utils import getPaymentCode, getTransactionId
+from bemosenderrr.models.base import CollectTransactionStatus
+from bemosenderrr.models.partner.partner import Country, PartnerSettlementAccount
+from bemosenderrr.models.partner.services.utils import getPaymentCode, getTransactionId
 from django.apps import apps
 from django.utils import timezone
 from datetime import datetime
@@ -41,7 +41,7 @@ class DirhamService():
             transaction_code = dirham_transaction_code
             paymentCode = collect_code
             collect_transaction_model = apps.get_model(
-                'bemoSenderr', 'CollectTransaction')
+                'bemosenderrr', 'CollectTransaction')
             instance = collect_transaction_model.objects.get(uuid=collect_uuid)
             settlement_account = PartnerSettlementAccount.objects.filter(partner=instance.partner, active=True).first()
             origin_currency = parameters['currency_origin']
@@ -66,19 +66,19 @@ class DirhamService():
             destination_currency = str(parameters['currency_destination']).upper()
             user_country = Country.objects.get(iso_code=parameters['origin_country']).iso_code
             receiver_country = Country.objects.get(iso_code=parameters['destination_country']).iso_code
-            senderIdentificationDocument = user_snapshot['document']['type']
-            if str(senderIdentificationDocument).lower() in 'passport':
-                senderIdentificationDocument = 'INTERNATIONAL_PASSEPORT'
-            elif str(senderIdentificationDocument).lower() in str("Driver's license").lower():
-                senderIdentificationDocument = "DRIVING_LICENCE"
-            elif str(senderIdentificationDocument).lower() in str('ID card').lower():
-                senderIdentificationDocument = 'NATIONAL_ID_CARD'
-            elif str(senderIdentificationDocument).lower() in str('Others').lower():
+            senderrIdentificationDocument = user_snapshot['document']['type']
+            if str(senderrIdentificationDocument).lower() in 'passport':
+                senderrIdentificationDocument = 'INTERNATIONAL_PASSEPORT'
+            elif str(senderrIdentificationDocument).lower() in str("Driver's license").lower():
+                senderrIdentificationDocument = "DRIVING_LICENCE"
+            elif str(senderrIdentificationDocument).lower() in str('ID card').lower():
+                senderrIdentificationDocument = 'NATIONAL_ID_CARD'
+            elif str(senderrIdentificationDocument).lower() in str('Others').lower():
                 pass
-            elif str(senderIdentificationDocument).lower() in str('O').lower():
-                senderIdentificationDocument = 'FOREIGNER_ID_CARD'
+            elif str(senderrIdentificationDocument).lower() in str('O').lower():
+                senderrIdentificationDocument = 'FOREIGNER_ID_CARD'
             else:
-                senderIdentificationDocument = 'FOREIGNER_ID_CARD'
+                senderrIdentificationDocument = 'FOREIGNER_ID_CARD'
             payer_data = {
                 "BMCE": 1001,
                 "BARID": 1002
@@ -115,7 +115,7 @@ class DirhamService():
                                             "payer": str(payer_data.get(payer, None)) if payer else "",
                                             "accountnumber": ""
                                         },
-                                        "sender": {
+                                        "senderr": {
                                             "firstname": user_snapshot['first_name'],
                                             "middlename": "",
                                             "lastname": user_snapshot['last_name'],

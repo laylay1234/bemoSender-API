@@ -4,18 +4,18 @@ import datetime as dt
 import json
 from django.utils import timezone
 from rest_framework.response import Response
-from bemoSenderr.models.partner.base import PartnerApiCallType
-from bemoSenderr.models.partner.partner import APICollectToken, APIRequestMonitoring, AppSettings, Partner, PartnerSettlementAccount, TransactionMethod, TransactionMethodAvailability
-from bemoSenderr.services import push_globaltx_datastore
-from bemoSenderr.utils.notifications import NotificationsHandler
-from bemoSenderr.utils.pinpoint import PinpointWrapper
-from bemoSenderr.bemoSenderr_api.bemoSenderr_api_codes import bemoSenderr_API_MESSAGE_CODES
-from bemoSenderr.models.partner.transactions import CollectTransaction
-from bemoSenderr.models.base import CollectTransactionStatus, PartnerType
+from bemosenderrr.models.partner.base import PartnerApiCallType
+from bemosenderrr.models.partner.partner import APICollectToken, APIRequestMonitoring, AppSettings, Partner, PartnerSettlementAccount, TransactionMethod, TransactionMethodAvailability
+from bemosenderrr.services import push_globaltx_datastore
+from bemosenderrr.utils.notifications import NotificationsHandler
+from bemosenderrr.utils.pinpoint import PinpointWrapper
+from bemosenderrr.bemosenderrr_api.bemosenderrr_api_codes import bemosenderrr_API_MESSAGE_CODES
+from bemosenderrr.models.partner.transactions import CollectTransaction
+from bemosenderrr.models.base import CollectTransactionStatus, PartnerType
 from jsonschema import validate
-from bemoSenderr.bemoSenderr_api.request_schemas import get_payment_schema, confirm_payment_schema, rollback_payment_schema, get_daily_account_statement_schema
+from bemosenderrr.bemosenderrr_api.request_schemas import get_payment_schema, confirm_payment_schema, rollback_payment_schema, get_daily_account_statement_schema
 from secrets import token_hex
-from bemoSenderr.models.base import GlobalTransactionStatus
+from bemosenderrr.models.base import GlobalTransactionStatus
 from rest_framework import status as http_status
 from django.apps import apps
 
@@ -56,7 +56,7 @@ def last_day_of_month(date):
         return date.replace(day=31)
     return date.replace(month=date.month+1, day=1) - dt.timedelta(days=1)
 
-def bemoSenderr_api(request=None, request_object=None):
+def bemosenderrr_api(request=None, request_object=None):
     time_stamp = datetime.strftime(timezone.now(),"%c")
     req_body = None
     response = {}
@@ -96,7 +96,7 @@ def bemoSenderr_api(request=None, request_object=None):
                         validate(instance=req_body, schema=reqBodySchema)
                     except:
                         response['response']['code'] = 1005
-                        response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[1005]
+                        response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[1005]
                         response['response']['data'] = ""
                         resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                         resp_db['jsonResponse'] = response
@@ -112,7 +112,7 @@ def bemoSenderr_api(request=None, request_object=None):
                         if payment_orders :
                             response['response']['data']['paymentOrders'] = list()
                             response['response']['code'] = 2000
-                            response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[2000]
+                            response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[2000]
                             print('Response code ', 2000)
                             for payment in payment_orders:
                                 
@@ -140,21 +140,21 @@ def bemoSenderr_api(request=None, request_object=None):
                                             payment_order['order'] = {
                                                 "reference": str(code),
                                                 "code": 2601,
-                                                "message": bemoSenderr_API_MESSAGE_CODES[2601]
+                                                "message": bemosenderrr_API_MESSAGE_CODES[2601]
                                             }
                                         elif api_collect_token and api_collect_token.api_user != request.user:
                                             print('The payment already requested by another payer... ', 2605)
                                             payment_order['order'] = {
                                                 "reference": str(code),
                                                 "code": 2605,
-                                                "message": bemoSenderr_API_MESSAGE_CODES[2605]
+                                                "message": bemosenderrr_API_MESSAGE_CODES[2605]
                                             }
                                         elif api_collect_token and api_collect_token.api_user == request.user and global_tx.status == GlobalTransactionStatus.collectransaction_in_progress:
                                             print('The payment already requested by another payer...??? ', 2605)
                                             payment_order['order'] = {
                                                 "reference": str(code),
                                                 "code": 2605,
-                                                "message": bemoSenderr_API_MESSAGE_CODES[2605]
+                                                "message": bemosenderrr_API_MESSAGE_CODES[2605]
                                             }
                                     # The payment isn't requested by any payer yet..
                                     else:
@@ -168,7 +168,7 @@ def bemoSenderr_api(request=None, request_object=None):
                                             currency_destination = str(collect_transaction.globaltransaction_set.all().first().parameters["currency_destination"]).upper()
                                             print(collect_transaction.updated_at)
                                             date = str(datetime.strftime(collect_transaction.updated_at, "%Y-%m-%d %H:%M:%S.%f"))
-                                            sender = collect_transaction.globaltransaction_set.all().first().user_snapshot
+                                            senderr = collect_transaction.globaltransaction_set.all().first().user_snapshot
                                             recipient = collect_transaction.globaltransaction_set.all().first().receiver_snapshot
                                             delivery_method = collect_transaction.globaltransaction_set.all().first().collect_method
                                             partner_method = TransactionMethod.objects.filter(name=delivery_method).first()
@@ -212,22 +212,22 @@ def bemoSenderr_api(request=None, request_object=None):
                                                     "payer": partner.active_payer.code,
                                                     "accountNumber": ""
                                                 }
-                                                payment_order['sender'] ={
-                                                    "firstName": sender['first_name'],
+                                                payment_order['senderr'] ={
+                                                    "firstName": senderr['first_name'],
                                                     "middlename": "",
-                                                    "lastName": sender['last_name'],
-                                                    "address1": sender['address_1'],
+                                                    "lastName": senderr['last_name'],
+                                                    "address1": senderr['address_1'],
                                                     "address2": "",
-                                                    "city": sender['city'],
-                                                    "state": sender['state'],
-                                                    "zipcode": sender['first_name'],
+                                                    "city": senderr['city'],
+                                                    "state": senderr['state'],
+                                                    "zipcode": senderr['first_name'],
                                                     "country": country_destination,
-                                                    "phone1": sender['phone_number'],
+                                                    "phone1": senderr['phone_number'],
                                                     "phone2": "",
                                                     "document": {
-                                                        "type": sender['document']['type'],
-                                                        "number": sender['document']['number'],
-                                                        "country": str(sender['document']['country']).upper()
+                                                        "type": senderr['document']['type'],
+                                                        "number": senderr['document']['number'],
+                                                        "country": str(senderr['document']['country']).upper()
                                                     }
                                                 }
                                                 payment_order['recipient'] = {
@@ -249,7 +249,7 @@ def bemoSenderr_api(request=None, request_object=None):
                                                 payment_order['order'] = {
                                                     "reference": str(payment['payment']['code']),
                                                     "code": 2602,
-                                                    "message": bemoSenderr_API_MESSAGE_CODES[2602]
+                                                    "message": bemosenderrr_API_MESSAGE_CODES[2602]
                                                 }
                                                 payment_order['payment'] = {
                                                     "code": str(collect_transaction.collect_code), ##TODO what is this ??
@@ -266,7 +266,7 @@ def bemoSenderr_api(request=None, request_object=None):
                                                 payment_order['order'] = {
                                                     "reference": str(payment['payment']['code']),
                                                     "code": 2601,
-                                                    "message": bemoSenderr_API_MESSAGE_CODES[2601]
+                                                    "message": bemosenderrr_API_MESSAGE_CODES[2601]
                                                 }
                                             elif status == CollectTransactionStatus.new:
                                                 print("Transaction is NEW")
@@ -277,7 +277,7 @@ def bemoSenderr_api(request=None, request_object=None):
                                             payment_order['order'] = {
                                                 "reference": str(payment['payment']['code']),
                                                 "code": 2600,
-                                                "message": bemoSenderr_API_MESSAGE_CODES[2600]
+                                                "message": bemosenderrr_API_MESSAGE_CODES[2600]
                                             }
                                 response['response']['data']['paymentOrders'].append(payment_order)
                         resp_db['httpStatus'] = http_status.HTTP_200_OK
@@ -289,7 +289,7 @@ def bemoSenderr_api(request=None, request_object=None):
                         return Response(response, status=http_status.HTTP_200_OK)
                     elif len(payment_orders) > 10:
                         response['response']['code'] = 2213
-                        response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[2213]
+                        response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[2213]
                         response['response']['data'] = ""
                         resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                         resp_db['jsonResponse'] = response
@@ -302,7 +302,7 @@ def bemoSenderr_api(request=None, request_object=None):
                 except Exception as e:
                     print("Exception caught ", e)
                     response['response']['code'] = 1000
-                    response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[1000]
+                    response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[1000]
                     response['response']['data'] = ""
                     resp_db['httpStatus'] = http_status.HTTP_500_INTERNAL_SERVER_ERROR
                     resp_db['jsonResponse'] = response
@@ -327,7 +327,7 @@ def bemoSenderr_api(request=None, request_object=None):
                         validate(instance=req_body, schema=reqBodySchema)
                     except:
                         response['response']['code'] = 1005
-                        response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[1005]
+                        response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[1005]
                         response['response']['data'] = ""
                         resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                         resp_db['jsonResponse'] = response
@@ -353,7 +353,7 @@ def bemoSenderr_api(request=None, request_object=None):
                             ## Token expired !!
                             if time_now > api_collect_token.expires_at:
                                 response['response']['code'] = 2211
-                                response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[2211]
+                                response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[2211]
                                 response['response']['data'] = ""
                                 resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                                 resp_db['jsonResponse'] = response
@@ -400,7 +400,7 @@ def bemoSenderr_api(request=None, request_object=None):
                                         else:
                                             resp_code = 2000
                                         response['response']['code'] = resp_code
-                                        response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[resp_code]
+                                        response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[resp_code]
                                         response['response']['data'] = ""
                                         resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                                         resp_db['jsonResponse'] = response
@@ -413,7 +413,7 @@ def bemoSenderr_api(request=None, request_object=None):
                                         collect_transaction.status = CollectTransactionStatus.collected
                                         collect_transaction.save()
                                         response['response']['code'] = 2000
-                                        response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[2000]
+                                        response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[2000]
                                         response['response']['data'] = {
                                             "paymentOrder":{
                                                 "payment":{
@@ -433,7 +433,7 @@ def bemoSenderr_api(request=None, request_object=None):
                                         return Response(response, status=http_status.HTTP_200_OK)
                             elif token != api_collect_token.token:
                                 response['response']['code'] = 2210
-                                response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[2210]
+                                response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[2210]
                                 response['response']['data'] = ""
                                 resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                                 resp_db['jsonResponse'] = response
@@ -445,7 +445,7 @@ def bemoSenderr_api(request=None, request_object=None):
                         ## Collect Code not found
                         else:
                             response['response']['code'] = 2202
-                            response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[2202]
+                            response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[2202]
                             response['response']['data'] = ""
                             resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                             resp_db['jsonResponse'] = response
@@ -458,7 +458,7 @@ def bemoSenderr_api(request=None, request_object=None):
                     print(e)
                     print("Exception caught ", e)
                     response['response']['code'] = 1000
-                    response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[1000]
+                    response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[1000]
                     response['response']['data'] = ""
                     resp_db['httpStatus'] = http_status.HTTP_500_INTERNAL_SERVER_ERROR
                     resp_db['jsonResponse'] = response
@@ -482,7 +482,7 @@ def bemoSenderr_api(request=None, request_object=None):
                         validate(instance=req_body, schema=reqBodySchema)
                     except Exception as e:
                         response['response']['code'] = 1005
-                        response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[1005]
+                        response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[1005]
                         response['response']['data'] = ""
                         resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                         resp_db['jsonResponse'] = response
@@ -509,7 +509,7 @@ def bemoSenderr_api(request=None, request_object=None):
                                 language = "FR"
                             global_tx_user = global_tx.user
                             
-                            notif_data = notif_service.get_tx_delayed_sender_push(lang=language, vars=[partner.display_name])
+                            notif_data = notif_service.get_tx_delayed_senderr_push(lang=language, vars=[partner.display_name])
                             client_support = AppSettings.objects.all().first()
                             print(f"CLIENT SUPPORT {client_support}")
                             if client_support:
@@ -581,7 +581,7 @@ def bemoSenderr_api(request=None, request_object=None):
                                         else:
                                             resp_code = 2000
                                         response['response']['code'] = resp_code
-                                        response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[resp_code]
+                                        response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[resp_code]
                                         response['response']['data'] = ""
                                         resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                                         resp_db['jsonResponse'] = response
@@ -596,10 +596,10 @@ def bemoSenderr_api(request=None, request_object=None):
                                             for collect_tx in collect_transactions:
                                                 collect_tx.status = CollectTransactionStatus.collect_ready
                                                 collect_tx.save()
-                                            global_tx_model = apps.get_model('bemoSenderr.GlobalTransaction').objects.filter(uuid=global_tx.uuid).update(status=GlobalTransactionStatus.collectransaction_in_progress)
+                                            global_tx_model = apps.get_model('bemosenderrr.GlobalTransaction').objects.filter(uuid=global_tx.uuid).update(status=GlobalTransactionStatus.collectransaction_in_progress)
                                             push_globaltx_datastore(instance=global_tx, status=GlobalTransactionStatus.collectransaction_in_progress)
                                         response['response']['code'] = 2000
-                                        response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[2000]
+                                        response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[2000]
                                         response['response']['data'] = {
                                             "paymentOrder":{
                                                 "payment":{
@@ -618,7 +618,7 @@ def bemoSenderr_api(request=None, request_object=None):
                                         return Response(response, status=http_status.HTTP_200_OK)
                             elif token != api_collect_token.token:
                                 response['response']['code'] = 2210
-                                response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[2210]
+                                response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[2210]
                                 response['response']['data'] = ""
                                 resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                                 resp_db['jsonResponse'] = response
@@ -630,7 +630,7 @@ def bemoSenderr_api(request=None, request_object=None):
                         ## Collect Code not found
                         else:
                             response['response']['code'] = 2202
-                            response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[2202]
+                            response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[2202]
                             response['response']['data'] = ""
                             resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                             resp_db['jsonResponse'] = response
@@ -643,7 +643,7 @@ def bemoSenderr_api(request=None, request_object=None):
                     print(e)
                     print("Exception caught ", e)
                     response['response']['code'] = 1000
-                    response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[1000]
+                    response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[1000]
                     response['response']['data'] = ""
                     resp_db['httpStatus'] = http_status.HTTP_500_INTERNAL_SERVER_ERROR
                     resp_db['jsonResponse'] = response
@@ -667,7 +667,7 @@ def bemoSenderr_api(request=None, request_object=None):
                         validate(instance=req_body, schema=reqBodySchema)
                     except:
                         response['response']['code'] = 1005
-                        response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[1005]
+                        response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[1005]
                         response['response']['data'] = ""
                         resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                         resp_db['jsonResponse'] = response
@@ -680,7 +680,7 @@ def bemoSenderr_api(request=None, request_object=None):
                     ## Statements exist and len(statements) <= 0
                     if statements and len(statements) <= 2:
                         response['response']['code'] = 2000
-                        response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[2000]
+                        response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[2000]
                         response['response']['data']['statements'] = list()
                         for statement in statements:
                             account = statement.get('account', None)
@@ -788,30 +788,30 @@ def bemoSenderr_api(request=None, request_object=None):
                                         print("account not active")
                                         data['account'] = account
                                         data['code'] = 2502
-                                        data['message'] = bemoSenderr_API_MESSAGE_CODES[2502] 
+                                        data['message'] = bemosenderrr_API_MESSAGE_CODES[2502] 
                                     else:
                                         print('Partner Settlement account does not exist')
                                         data['account'] = account
                                         data['code'] = 2500
-                                        data['message'] = bemoSenderr_API_MESSAGE_CODES[2500]
+                                        data['message'] = bemosenderrr_API_MESSAGE_CODES[2500]
                                         
                                 else:
                                     print('date missing or invalid')
                                     data['account'] = account
                                     data['code'] = 2501
-                                    data['message'] = bemoSenderr_API_MESSAGE_CODES[2501]
+                                    data['message'] = bemosenderrr_API_MESSAGE_CODES[2501]
                             
                             else:
                                 print('account missing or invalid')
                                 data['account'] = account
                                 data['code'] = 2500
-                                data['message'] = bemoSenderr_API_MESSAGE_CODES[2500]
+                                data['message'] = bemosenderrr_API_MESSAGE_CODES[2500]
                             response['response']['data']['statements'].append(data)
                     # Too many statements. 
                     else:
                         print('Too many statements .')
                         response['response']['code'] = 2503
-                        response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[2503]
+                        response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[2503]
                         response['response']['data'] = ""
                         response = dict(sorted(response.items()))
                         resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
@@ -833,7 +833,7 @@ def bemoSenderr_api(request=None, request_object=None):
                     print(e)
                     print("Exception caught ", e)
                     response['response']['code'] = 1000
-                    response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[1000]
+                    response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[1000]
                     response['response']['data'] = ""
                     resp_db['httpStatus'] = http_status.HTTP_500_INTERNAL_SERVER_ERROR
                     resp_db['jsonResponse'] = response
@@ -845,7 +845,7 @@ def bemoSenderr_api(request=None, request_object=None):
 
             else:
                 response['response']['code'] = 1002
-                response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[1002]
+                response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[1002]
                 response['response']['data'] = ""
                 resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
                 resp_db['jsonResponse'] = response
@@ -856,7 +856,7 @@ def bemoSenderr_api(request=None, request_object=None):
                 return Response(response, status=http_status.HTTP_400_BAD_REQUEST)
     else:
         response['response']['code'] = 1005
-        response['response']['message'] = bemoSenderr_API_MESSAGE_CODES[1005]
+        response['response']['message'] = bemosenderrr_API_MESSAGE_CODES[1005]
         response['response']['data'] = ""
         resp_db['httpStatus'] = http_status.HTTP_400_BAD_REQUEST
         resp_db['jsonResponse'] = response

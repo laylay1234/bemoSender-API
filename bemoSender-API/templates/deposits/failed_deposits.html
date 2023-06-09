@@ -8,7 +8,7 @@
     <div>
         Report Date: {{date_now}} <br>
         Environment: {{env}}<br>
-        Transfer from {{sender_fullname}}<br>
+        Transfer from {{senderr_fullname}}<br>
         Amount: {{amount}}$<br>
         Transfer Email Date : {{email_date}}<br>
         {{deposit_type}} failed<br>
@@ -21,7 +21,7 @@
         &nbsp;&nbsp;&nbsp;Phone: {{user_phone_number}}<br>
         <br><br>
         Duplicates ({{ length_duplicates }}):<br>
-        &nbsp;&nbsp;&nbsp;original - {{sender_fullname}} ({{user_email}})<br>
+        &nbsp;&nbsp;&nbsp;original - {{senderr_fullname}} ({{user_email}})<br>
         {% for duplicate in duplicates %}
         &nbsp;&nbsp;&nbsp;{{duplicate.uuid}} - {{duplicate.fullname}} ({{duplicate.phone_number}} - {{duplicate.email}})
         {{duplicate.status}}

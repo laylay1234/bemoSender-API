@@ -1,8 +1,8 @@
 import json
 import boto3
 from loguru import logger
-from bemoSenderr.utils.mutation_queries import UPDATE_ADDRESS_MUTATION, UPDATE_PROFILE_MUTATION, UPDATE_USER_MUTATION
-from bemoSenderr.utils.appsync import make_client
+from bemosenderrr.utils.mutation_queries import UPDATE_ADDRESS_MUTATION, UPDATE_PROFILE_MUTATION, UPDATE_USER_MUTATION
+from bemosenderrr.utils.appsync import make_client
 from gql import gql
 from django.conf import settings
 

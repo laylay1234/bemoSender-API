@@ -2,7 +2,7 @@ from rest_framework.views import exception_handler
 from loguru import logger
 from rest_framework.response import Response
 
-def bemoSenderr_exception_handler(exc, context):
+def bemosenderrr_exception_handler(exc, context):
     # If an exception is thrown that we don't explicitly handle here, we want
     # to delegate to the default exception handler offered by DRF. If we do
     # handle this exception type, we will still want access to the response

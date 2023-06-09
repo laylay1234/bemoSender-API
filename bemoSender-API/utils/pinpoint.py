@@ -4,7 +4,7 @@ import boto3
 from django.conf import settings
 from loguru import logger
 from pyfcm import FCMNotification
-from bemoSenderr.models.user import UserToken
+from bemosenderrr.models.user import UserToken
 
 
 """
@@ -32,7 +32,7 @@ class PinpointWrapper():
         )
                     
 
-    def send_push_notifications_and_data(self, fcm_token=None, user_snapshot=None, user=None, status=None, data=None, type=None, title="bemoSenderr", global_tx_uuid="", error=None, new_user_tier_level=None, old_user_tier_level=None):
+    def send_push_notifications_and_data(self, fcm_token=None, user_snapshot=None, user=None, status=None, data=None, type=None, title="bemosenderrr", global_tx_uuid="", error=None, new_user_tier_level=None, old_user_tier_level=None):
         try:
             #device_tokens = self.get_user_tokens(user_snapshot=user_snapshot, user_id=user.username)
             #print('THE DEVICE TOKENS', device_tokens)

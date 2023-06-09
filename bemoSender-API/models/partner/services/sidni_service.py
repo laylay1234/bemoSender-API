@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
 import datetime
-from bemoSenderr.models.partner.services.state_code_gen import StateCodeGenerator
+from bemosenderrr.models.partner.services.state_code_gen import StateCodeGenerator
 
 
 class SidniService():
@@ -15,7 +15,7 @@ class SidniService():
     @logger.catch
     def generate_reference_number(self):
         number = int(random() * 99999999999)
-        kyc_verification_model = apps.get_model('bemoSenderr', 'KycVerificationRequest')
+        kyc_verification_model = apps.get_model('bemosenderrr', 'KycVerificationRequest')
         sidni_queryset = kyc_verification_model.objects.filter(partner_response__contains={"userReference": f"{number}"})
         if len(sidni_queryset) > 0:
             logger.info('USER REFERENCE EXISTS RETRYING')
@@ -27,7 +27,7 @@ class SidniService():
     def get_cust_kyc_id(self):
         try:
             number = int(random() * 99999999999)
-            kyc_verification_model = apps.get_model('bemoSenderr', 'KycVerificationRequest')
+            kyc_verification_model = apps.get_model('bemosenderrr', 'KycVerificationRequest')
             sidni_cust_id_queryset = kyc_verification_model.objects.filter(custom_transaction_id=str(number))
             sidni_user_ref_queryset = kyc_verification_model.objects.filter(partner_response__contains={"userReference": f"{number}"})
             logger.info(f'sidni cust id queryset : {sidni_cust_id_queryset}')

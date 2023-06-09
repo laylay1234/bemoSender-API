@@ -2,15 +2,15 @@ from gql import gql
 from celery.app import shared_task
 from django.db import models
 from loguru import logger
-from bemoSenderr.models.base import VerificationStatus
-from bemoSenderr.models.partner.base import AbstractVerificationRequest
+from bemosenderrr.models.base import VerificationStatus
+from bemosenderrr.models.partner.base import AbstractVerificationRequest
 from django.utils import timezone
 import sys
 from django.apps import apps
 
-from bemoSenderr.utils.appsync import make_client
-from bemoSenderr.utils.mutation_queries import UPDATE_USER_MUTATION
-from bemoSenderr.utils.sync_flinks_signup_data import sync_flinks_signup_data
+from bemosenderrr.utils.appsync import make_client
+from bemosenderrr.utils.mutation_queries import UPDATE_USER_MUTATION
+from bemosenderrr.utils.sync_flinks_signup_data import sync_flinks_signup_data
 
 
 """
@@ -18,7 +18,7 @@ login_id     | The token returned by the Frontend Widget to send to the Auth API
 account_id   | The Account's ID returned by the Frontend Widget following the selection of a specific account.
 """
 """
-This module is for handling User Bank Verification, the verify celery task is invoked in bemoSenderr/views/UserVerificationByBankViewSet class 
+This module is for handling User Bank Verification, the verify celery task is invoked in bemosenderrr/views/UserVerificationByBankViewSet class 
 in perform_create function.
 """
 class UserBankVerificationRequest(AbstractVerificationRequest):
@@ -42,7 +42,7 @@ class UserBankVerificationRequest(AbstractVerificationRequest):
             
             time_now = timezone.now().strftime('%c')
             report += 'USER BANK VERIFICATION REQUEST FOR '
-            user_bank_verification = apps.get_model('bemoSenderr', 'UserBankVerificationRequest')
+            user_bank_verification = apps.get_model('bemosenderrr', 'UserBankVerificationRequest')
             instance = user_bank_verification.objects.get(uuid=uuid)
             report += f"USER BANK VERIFICATION REQUEST UUID {str(uuid)}" + "\n" + f"USER : {str(instance.user)}" + "\n"
             report += 'TIME : ' + time_now + "\n"
@@ -52,7 +52,7 @@ class UserBankVerificationRequest(AbstractVerificationRequest):
             """
             if api_config.get('serviceClass', None) and instance.partner:
                 service = api_config['serviceClass']
-                partner_service = getattr(sys.modules['bemoSenderr.models.partner.services'], service)(url=api_config['url'], api_config=api_config)
+                partner_service = getattr(sys.modules['bemosenderrr.models.partner.services'], service)(url=api_config['url'], api_config=api_config)
                 user_snapshot = instance.user_snapshot
                 parameters = instance.partner_parameters
                 parameters['user_snapshot'] = user_snapshot

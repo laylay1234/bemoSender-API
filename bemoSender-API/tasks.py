@@ -7,33 +7,33 @@ from django.conf import settings
 from django.utils import timezone as django_tz
 from celery import shared_task
 import reversion
-from bemoSenderr.logger import SendAdminAlerts, send_email_celery_exception
-from bemoSenderr.models import UserTask
-from bemoSenderr.models.base import FundingTransactionStatus, GlobalTransactionStatus, PartnerStatus, PartnerType, VerificationStatus
-from bemoSenderr.models.partner.bank_verification import UserBankVerificationRequest
-from bemoSenderr.models.partner.currconv import CurrConvOperation
-from bemoSenderr.models.partner.partner import AppSettings, Country, ExchangeRateTier, PartnerExchangeRate, Partner, PartnerSettlementAccount
-from bemoSenderr.models.partner.services.apaylo_service import ApayloService
-from bemoSenderr.models.partner.services.dirham_service import DirhamService
-from bemoSenderr.models.partner.services.flinks_service import FlinksService
-from bemoSenderr.models.user import User
-from bemoSenderr.operations import  SendInvoice
-from bemoSenderr.utils.email_service import EmailService
+from bemosenderrr.logger import SendAdminAlerts, send_email_celery_exception
+from bemosenderrr.models import UserTask
+from bemosenderrr.models.base import FundingTransactionStatus, GlobalTransactionStatus, PartnerStatus, PartnerType, VerificationStatus
+from bemosenderrr.models.partner.bank_verification import UserBankVerificationRequest
+from bemosenderrr.models.partner.currconv import CurrConvOperation
+from bemosenderrr.models.partner.partner import AppSettings, Country, ExchangeRateTier, PartnerExchangeRate, Partner, PartnerSettlementAccount
+from bemosenderrr.models.partner.services.apaylo_service import ApayloService
+from bemosenderrr.models.partner.services.dirham_service import DirhamService
+from bemosenderrr.models.partner.services.flinks_service import FlinksService
+from bemosenderrr.models.user import User
+from bemosenderrr.operations import  SendInvoice
+from bemosenderrr.utils.email_service import EmailService
 import pprint
 from django.apps import apps
 from loguru import  logger
-from bemoSenderr.utils.mutation_queries import GET_GLOBAL_TRANSACTION_QUERY, GET_PARAMETERS_QUERY, UPDATE_GLOBAL_TX_PARAMETERS_MUTATION
-from bemoSenderr.utils.s3 import upload_to_s3
+from bemosenderrr.utils.mutation_queries import GET_GLOBAL_TRANSACTION_QUERY, GET_PARAMETERS_QUERY, UPDATE_GLOBAL_TX_PARAMETERS_MUTATION
+from bemosenderrr.utils.s3 import upload_to_s3
 from django.conf import settings
 from django.core.mail import send_mail
-from bemoSenderr.utils.appsync import make_client
+from bemosenderrr.utils.appsync import make_client
 from gql import gql
 import copy
 from difflib import SequenceMatcher
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
-from bemoSenderr.utils.notifications import NotificationsHandler
-from bemoSenderr.utils.sync_flinks_signup_data import sync_flinks_signup_data
+from bemosenderrr.utils.notifications import NotificationsHandler
+from bemosenderrr.utils.sync_flinks_signup_data import sync_flinks_signup_data
 
 
 
@@ -287,7 +287,7 @@ def find_similarity_match(client_name=None, client_email=None, user_query_set=No
                 data = {
                     "date_now":datetime.datetime.utcnow().isoformat(),
                     "env": settings.CONFIG.get('ENV', "Dev-V3"),
-                    "sender_fullname": found_client,
+                    "senderr_fullname": found_client,
                     "amount": format(float(amount), ".2f"),
                     "deposit_type" : deposit_type,
                     "user_id": str(best_match.uuid),
@@ -299,9 +299,9 @@ def find_similarity_match(client_name=None, client_email=None, user_query_set=No
                     "length_duplicates": len(duplicates),
                     "duplicates": duplicates
                 }
-                html_message = render_to_string(os.path.join(os.getcwd(), 'bemoSenderr','templates', 'deposits', 'failed_deposits.html'), data)
+                html_message = render_to_string(os.path.join(os.getcwd(), 'bemosenderrr','templates', 'deposits', 'failed_deposits.html'), data)
                 print(html_message)
-                to = 'bemoSenderr.test@gmail.com'
+                to = 'bemosenderrr.test@gmail.com'
                 admin_emails = NotificationsHandler().get_staff_users_emails()
                 if admin_emails:
                     if to in admin_emails:
@@ -425,7 +425,7 @@ def check_deposits(self, start_date=None, end_date=None):
                     i = i + 1
                     report = report + f"TRANSFER #{i}" + '\n'
                     logger.info(item)
-                    global_transaction = apps.get_model('bemoSenderr.GlobalTransaction').objects.filter(status=GlobalTransactionStatus.fundtransaction_in_progress, funding_transaction__reference_code=item['ReferenceNumber']).first()
+                    global_transaction = apps.get_model('bemosenderrr.GlobalTransaction').objects.filter(status=GlobalTransactionStatus.fundtransaction_in_progress, funding_transaction__reference_code=item['ReferenceNumber']).first()
                     logger.info(f"{global_transaction}")
                     if global_transaction:
                         funding_instance = global_transaction.funding_transaction
@@ -437,7 +437,7 @@ def check_deposits(self, start_date=None, end_date=None):
                         funding_instance.partner_response = search_transfer_result
                         client_name = global_transaction.user_snapshot['first_name'] + " " + global_transaction.user_snapshot['last_name']
                         report = report + "FOUND 1 MATCH : " + client_name + '\n'
-                        print('this is the item ', item['SenderName'])
+                        print('this is the item ', item['senderrName'])
                         report = report + "Name matches " + client_name + "\n"
                         # Client matches and amount matches !
                         if global_transaction and client_name and item and float(item['Amount']) == float(
@@ -512,10 +512,10 @@ def check_deposits(self, start_date=None, end_date=None):
                                 Amount: {format(float(global_transaction.parameters.get('amount_origin', 0)), ".2f")} {global_transaction.parameters['currency_origin']} - {format(float(global_transaction.parameters.get('amount_destination', 0)), ".2f")} {global_transaction.parameters['currency_destination']}
 
                                 Auto-deposit interrupted
-                                Sender tried to send an Interac transfer smaller than the minimum transaction amount ({min_transaction_amount} {global_transaction.parameters['currency_origin']}).
+                                senderr tried to send an Interac transfer smaller than the minimum transaction amount ({min_transaction_amount} {global_transaction.parameters['currency_origin']}).
                                 """
                                 print(email_data)
-                                recipients = apps.get_model('bemoSenderr.AdminAlerts').objects.filter(can_receive_celery_exceptions=True)
+                                recipients = apps.get_model('bemosenderrr.AdminAlerts').objects.filter(can_receive_celery_exceptions=True)
                                 recipients_emails = []
                                 if recipients:
                                     for recipient in recipients:
@@ -676,7 +676,7 @@ def check_deposits(self, start_date=None, end_date=None):
                             report = report + f"TRANSFER #{i}" + '\n'
                             report  = report + f"EMAIL DATA {item}" + "\n" + "-------------------------------------------" + "\n"
                             
-                            global_transactions = apps.get_model('bemoSenderr.GlobalTransaction').objects.filter(user=user, 
+                            global_transactions = apps.get_model('bemosenderrr.GlobalTransaction').objects.filter(user=user, 
                                     status=GlobalTransactionStatus.fundtransaction_in_progress, funding_transaction__reference_code=None).order_by('-created_at')
                             last_global_transaction = None
                             item = data[0]
@@ -761,10 +761,10 @@ def check_deposits(self, start_date=None, end_date=None):
                                         Amount: {format(float(last_global_transaction.parameters.get('amount_origin', 0)), ".2f")} {last_global_transaction.parameters['currency_origin']} - {format(float(last_global_transaction.parameters.get('amount_destination', 0)), ".2f")} {last_global_transaction.parameters['currency_destination']}
 
                                         Auto-deposit interrupted
-                                        Sender tried to send an Interac transfer smaller than the minimum transaction amount ({min_transaction_amount} {last_global_transaction.parameters['currency_origin']}).
+                                        senderr tried to send an Interac transfer smaller than the minimum transaction amount ({min_transaction_amount} {last_global_transaction.parameters['currency_origin']}).
                                         """
                                         print(email_data)
-                                        recipients = apps.get_model('bemoSenderr.AdminAlerts').objects.filter(can_receive_celery_exceptions=True)
+                                        recipients = apps.get_model('bemosenderrr.AdminAlerts').objects.filter(can_receive_celery_exceptions=True)
                                         recipients_emails = []
                                         if recipients:
                                             for recipient in recipients:
@@ -1007,7 +1007,7 @@ def authorize_deposits(self, start_date=None, end_date=None):
                                 matching_report['matchRatio'] = matched_user.get('ratio')
                                 matching_report['matchedUserID'] = f"{str(matched_user['closest_match'].first_name)} {str(matched_user['closest_match'].last_name)} {matched_user['closest_match'].email} ({str(matched_user['closest_match'].username)})"
                                 user = None
-                            reference_code_query = apps.get_model('bemoSenderr.GlobalTransaction').objects.filter(funding_transaction__reference_code=ref_code).first()
+                            reference_code_query = apps.get_model('bemosenderrr.GlobalTransaction').objects.filter(funding_transaction__reference_code=ref_code).first()
                             retrieved_emails += json.dumps(matching_report, indent=4) + "\n"
                             temp_report += "\n" + f"EMAIL N° {i}"
                             if reference_code_query:
@@ -1016,7 +1016,7 @@ def authorize_deposits(self, start_date=None, end_date=None):
                             
                             if user and ref_code and not reference_code_query:
 
-                                global_transactions = apps.get_model('bemoSenderr.GlobalTransaction').objects.filter(status=GlobalTransactionStatus.fundtransaction_in_progress,
+                                global_transactions = apps.get_model('bemosenderrr.GlobalTransaction').objects.filter(status=GlobalTransactionStatus.fundtransaction_in_progress,
                                     user=user, funding_transaction__reference_code=None).order_by('-created_at')
                                 # Found 1 match of the user
                                 logger.info(f"length of globaltransactions {len(global_transactions)}")
@@ -1098,10 +1098,10 @@ def authorize_deposits(self, start_date=None, end_date=None):
                                             Amount: {format(float(last_global_transaction.parameters.get('amount_origin', 0)), ".2f")} {last_global_transaction.parameters['currency_origin']} - {format(float(last_global_transaction.parameters.get('amount_destination', 0)), ".2f")} {last_global_transaction.parameters['currency_destination']}
 
                                             {deposit_type} interrupted
-                                            Sender tried to send an Interac transfer smaller than the minimum transaction amount ({min_transaction_amount} {last_global_transaction.parameters['currency_origin']}).
+                                            senderr tried to send an Interac transfer smaller than the minimum transaction amount ({min_transaction_amount} {last_global_transaction.parameters['currency_origin']}).
                                             """
                                             print(email_data)
-                                            recipients = apps.get_model('bemoSenderr.AdminAlerts').objects.filter(can_receive_celery_exceptions=True)
+                                            recipients = apps.get_model('bemosenderrr.AdminAlerts').objects.filter(can_receive_celery_exceptions=True)
                                             recipients_emails = []
                                             if recipients:
                                                 for recipient in recipients:
@@ -1428,7 +1428,7 @@ def check_refunds(self, start_date=None, end_date=None):
                 for item in items:
                     report += f"TRANSFER {i}"
                     transaction_number = item.get('TransactionNumber', None)
-                    funding_transaction = apps.get_model('bemoSenderr.FundingTransaction').objects.filter(refund_reference_code=transaction_number).first()
+                    funding_transaction = apps.get_model('bemosenderrr.FundingTransaction').objects.filter(refund_reference_code=transaction_number).first()
                     if funding_transaction:
                         report += "FOUND A MATCH\n"
                         global_tx = funding_transaction.globaltransaction_set.all().first()
@@ -1472,7 +1472,7 @@ def check_refunds(self, start_date=None, end_date=None):
 @shared_task(bind=True)
 @reversion.create_revision()
 def send_invoice_task(self, global_tx=None, *args, **kwargs):
-    global_tx = apps.get_model('bemoSenderr.GlobalTransaction').objects.get(uuid=global_tx)
+    global_tx = apps.get_model('bemosenderrr.GlobalTransaction').objects.get(uuid=global_tx)
     invoice_service = SendInvoice()
     invoice_service.send_invoice(global_tx)
 

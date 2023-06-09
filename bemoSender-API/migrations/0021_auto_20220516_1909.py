@@ -9,7 +9,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0020_auto_20220516_1414'),
+        ('bemosenderrr', '0020_auto_20220516_1414'),
     ]
 
     operations = [

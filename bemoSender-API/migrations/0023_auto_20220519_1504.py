@@ -9,7 +9,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0022_auto_20220518_1959'),
+        ('bemosenderrr', '0022_auto_20220518_1959'),
     ]
 
     operations = [
@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('device_type', models.CharField(help_text='The device type', max_length=255)),
                 ('app_version', models.CharField(help_text='The App version', max_length=255)),
                 ('time_zone', models.CharField(help_text='The timezone of the user', max_length=255)),
-                ('gcm_senderid', models.CharField(blank=True, help_text='The GCM SenderID', max_length=255, null=True)),
+                ('gcm_senderrid', models.CharField(blank=True, help_text='The GCM senderrID', max_length=255, null=True)),
                 ('device_data', models.JSONField(blank=True, default=dict, help_text='The device data', null=True)),
                 ('app_identifier', models.CharField(blank=True, help_text='The app identifier', max_length=255, null=True)),
                 ('installation_id', models.CharField(blank=True, help_text='The installation id', max_length=255, null=True)),

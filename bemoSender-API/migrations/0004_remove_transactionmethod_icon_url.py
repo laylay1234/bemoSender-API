@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0003_transactionmethod_icon_url'),
+        ('bemosenderrr', '0003_transactionmethod_icon_url'),
     ]
 
     operations = [

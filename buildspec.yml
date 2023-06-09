@@ -29,7 +29,7 @@ phases:
 #      - ENV='Test-V1' DB_NAME='test_v1_connect_4' python3 manage.py migrate
       - python3 manage.py collectstatic -c --noinput
       - python3 manage.py compilemessages -i venv -i public -i requirements.txt -i requirements.txt.py
-#      - ENV='Test-V1' python3 manage.py test --keepdb --parallel=4 --failfast --noinput bemoSenderr
+#      - ENV='Test-V1' python3 manage.py test --keepdb --parallel=4 --failfast --noinput bemosenderrr
   post_build:
     commands:
       - python3 manage.py compile_pyc
@@ -42,7 +42,7 @@ artifacts:
 #    - 'flexselect/**/*'
     - 'jet/**/*'
     - 'locale/**/*'
-    - 'bemoSenderr/**/*'
+    - 'bemosenderrr/**/*'
     - 'public/**/*'
     - 'Procfile'
     - '*.py'

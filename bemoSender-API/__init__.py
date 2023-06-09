@@ -1,4 +1,4 @@
-default_app_config = 'bemoSenderr.apps.bemoSenderrConfig'
+default_app_config = 'bemosenderrr.apps.bemosenderrrConfig'
 
 from .celery import app as celery_app
 __all__ = ('celery_app',)

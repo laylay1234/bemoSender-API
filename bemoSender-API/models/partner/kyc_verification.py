@@ -3,17 +3,17 @@ from time import sleep
 from celery.app import shared_task
 from django.db import models
 from loguru import logger
-from bemoSenderr.models.base import VerificationStatus
-from bemoSenderr.models.partner.base import  AbstractVerificationRequest
-from bemoSenderr.models.partner.services.state_code_gen import StateCodeGenerator
-from bemoSenderr.utils.appsync import make_client
-from bemoSenderr.utils.log import debug
+from bemosenderrr.models.base import VerificationStatus
+from bemosenderrr.models.partner.base import  AbstractVerificationRequest
+from bemosenderrr.models.partner.services.state_code_gen import StateCodeGenerator
+from bemosenderrr.utils.appsync import make_client
+from bemosenderrr.utils.log import debug
 from django.apps import apps
 import sys
 from django.utils import timezone
 from gql import gql
 
-from bemoSenderr.utils.mutation_queries import UPDATE_ADDRESS_MUTATION
+from bemosenderrr.utils.mutation_queries import UPDATE_ADDRESS_MUTATION
 
 
 class KycVerificationRequest(AbstractVerificationRequest):
@@ -38,7 +38,7 @@ class KycVerificationRequest(AbstractVerificationRequest):
             
             time_now = timezone.now().strftime('%c')
             report += 'KYC VERIFICATION REQUEST FOR '
-            kyc_verification_model = apps.get_model('bemoSenderr', 'KycVerificationRequest')
+            kyc_verification_model = apps.get_model('bemosenderrr', 'KycVerificationRequest')
             instance = kyc_verification_model.objects.filter(uuid=uuid).select_related("user", "partner").first()
             try:
                 logger.info(f"UPDATING USER STATE CODE")
@@ -57,7 +57,7 @@ class KycVerificationRequest(AbstractVerificationRequest):
                 """
                 *** Very important to instanciate the class with () #partner_service so the flow doesn't break. ***
                 """
-                partner_service = getattr(sys.modules['bemoSenderr.models.partner.services'], service)()
+                partner_service = getattr(sys.modules['bemosenderrr.models.partner.services'], service)()
                 user_snapshot = instance.user_snapshot
                 """
                 The verifying function has to be named "verify_individual" to keep this feature dynamic for new partners.

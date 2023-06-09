@@ -1,8 +1,8 @@
 from loguru import logger
 from django_fsm import  transition
-from bemoSenderr.models.base import CollectTransactionStatus, FundingTransactionStatus, GlobalTransactionStatus
-from bemoSenderr.operations import SendMoney
-from bemoSenderr.models.task import PeriodicTasksEntry
+from bemosenderrr.models.base import CollectTransactionStatus, FundingTransactionStatus, GlobalTransactionStatus
+from bemosenderrr.operations import SendMoney
+from bemosenderrr.models.task import PeriodicTasksEntry
 
 class CollectTransactionTransitions():
 

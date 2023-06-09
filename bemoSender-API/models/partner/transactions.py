@@ -4,24 +4,24 @@ import traceback
 from django.conf import settings
 from django.db import models
 import datetime
-from bemoSenderr.logger import SendAdminAlerts, send_email_celery_exception
-from bemoSenderr.models.base import AbstractBaseModel, CollectTransactionStatus, FundingTransactionStatus, GlobalTransactionStatus
-from bemoSenderr.models.partner.base import AbstractCollectPartner, AbstractFundingPartner, AbstractPartnerTransaction
+from bemosenderrr.logger import SendAdminAlerts, send_email_celery_exception
+from bemosenderrr.models.base import AbstractBaseModel, CollectTransactionStatus, FundingTransactionStatus, GlobalTransactionStatus
+from bemosenderrr.models.partner.base import AbstractCollectPartner, AbstractFundingPartner, AbstractPartnerTransaction
 from celery import shared_task
 from django.apps import apps
-from bemoSenderr.models.partner.partner import AppSettings
-from bemoSenderr.models.partner.services.utils import start_collect_periodic_task
-from bemoSenderr.models.task import PeriodicTasksEntry
-from bemoSenderr.models.transitions import CollectTransactionTransitions
-from bemoSenderr.services import SyncCollectTransactions
-from bemoSenderr.utils.log import debug
+from bemosenderrr.models.partner.partner import AppSettings
+from bemosenderrr.models.partner.services.utils import start_collect_periodic_task
+from bemosenderrr.models.task import PeriodicTasksEntry
+from bemosenderrr.models.transitions import CollectTransactionTransitions
+from bemosenderrr.services import SyncCollectTransactions
+from bemosenderrr.utils.log import debug
 from django.utils.translation import ugettext_lazy as _
 from loguru import logger
 from django.db import transaction
 from django.utils import timezone
-from bemoSenderr.utils.notifications import NotificationsHandler
-from bemoSenderr.utils.pinpoint import PinpointWrapper
-from bemoSenderr.utils.s3 import upload_to_s3
+from bemosenderrr.utils.notifications import NotificationsHandler
+from bemosenderrr.utils.pinpoint import PinpointWrapper
+from bemosenderrr.utils.s3 import upload_to_s3
 from dateutil.relativedelta import relativedelta
 from redbeat import RedBeatSchedulerEntry as Entry
 import copy
@@ -39,7 +39,7 @@ from django_fsm import FSMField
 
 """
 """
-Both the funding and collect transactions are launched from bemoSenderr/operations.py module using django signals.
+Both the funding and collect transactions are launched from bemosenderrr/operations.py module using django signals.
 
 """
 
@@ -68,14 +68,14 @@ class CollectTransaction(AbstractPartnerTransaction, AbstractCollectPartner, Col
         report = ''
         try:
             collect_transaction_model = apps.get_model(
-                        'bemoSenderr', 'CollectTransaction')
+                        'bemosenderrr', 'CollectTransaction')
             instance = collect_transaction_model.objects.filter(uuid=collect_uuid).prefetch_related("partner", "partner__api_user").first()
             report += str(instance) + "\n"
             report += "UUID : " + str(instance.uuid) + "\n"
             time_now = datetime.datetime.strftime(timezone.now(), "%c")
             report += f'Time : {time_now}' +  "\n"
             global_transaction_model = apps.get_model(
-                        'bemoSenderr', 'GlobalTransaction')
+                        'bemosenderrr', 'GlobalTransaction')
             global_transaction = global_transaction_model.objects.get(
                 uuid=global_transaction_id)
             # Partners with services() Check if it's an Outbound partner (Partner that we use their API)
@@ -85,7 +85,7 @@ class CollectTransaction(AbstractPartnerTransaction, AbstractCollectPartner, Col
                     report += f"Service Name {api_config['serviceClass']}" + "\n"
                     service = api_config['serviceClass']
                     partner_service = getattr(
-                        sys.modules['bemoSenderr.models.partner.services'], service)()
+                        sys.modules['bemosenderrr.models.partner.services'], service)()
                     report += str(global_transaction) + "\n" + " UUID : " + str(global_transaction_id) + "\n" "Global Transaction Status " + str(global_transaction.status) + '\n'
                     user_snapshot = global_transaction.user_snapshot
                     user_snapshot['document']['expiration_date'] = str(user_snapshot['document']['expiration_date']).split(' ')[0]
@@ -151,7 +151,7 @@ class CollectTransaction(AbstractPartnerTransaction, AbstractCollectPartner, Col
                     report += f"Exception caught : {str(e)}"
                     logger.exception(f"collect for  {str(instance)} failed due to {str(e)}")
                     send_email_celery_exception(e)
-            #API User (Inbound Partners who consume bemoSenderr API )
+            #API User (Inbound Partners who consume bemosenderrr API )
             else:
                 """
                 Check if collect_code already exists (in case of retrying the transaction in the admin dashboard)
@@ -161,7 +161,7 @@ class CollectTransaction(AbstractPartnerTransaction, AbstractCollectPartner, Col
                         report += f"API Partner {str(instance)}" + "\n"
                         report += "UUID : " + str(instance.uuid) + "\n"
                         report += str(global_transaction) + "\n" + " UUID : " + str(global_transaction_id) + "\n" "Global Transaction Status " + str(global_transaction.status) + '\n'
-                        country_model = apps.get_model('bemoSenderr', 'Country')
+                        country_model = apps.get_model('bemosenderrr', 'Country')
                         country = country_model.objects.filter(iso_code=global_transaction.parameters['destination_country']).first()
                         if country:
                             apiPartnerPrefix = '9' + str(country.calling_code)
@@ -211,7 +211,7 @@ class CollectTransaction(AbstractPartnerTransaction, AbstractCollectPartner, Col
     def check_collect_status(self, params=None):
         state = False
         global_transaction_model = apps.get_model(
-                        'bemoSenderr', 'GlobalTransaction')
+                        'bemosenderrr', 'GlobalTransaction')
         global_transaction = global_transaction_model.objects.get(
             uuid=params['gtx_uuid'])
         try:
@@ -234,7 +234,7 @@ class CollectTransaction(AbstractPartnerTransaction, AbstractCollectPartner, Col
                     report += f"Service Name {api_config['serviceClass']}" + "\n"
                     service = api_config['serviceClass']
                     partner_service = getattr(
-                        sys.modules['bemoSenderr.models.partner.services'], service)()
+                        sys.modules['bemosenderrr.models.partner.services'], service)()
                     transaction_code = instance.collect_code
                     logger.info(f'STARTING CHECKSTATUS FOR {instance.partner}')
                     old_status = instance.status
@@ -257,7 +257,7 @@ class CollectTransaction(AbstractPartnerTransaction, AbstractCollectPartner, Col
                     report += f"check collect status for  {str(instance)} failed due to {str(e)}"
                     send_email_celery_exception(e)
             else:
-                #This is for API partners (Inbound Partners that consume bemoSenderr API) we don't need to check the status of the transaction (cuz it's changed by the API Partner using bemoSenderr API)
+                #This is for API partners (Inbound Partners that consume bemosenderrr API) we don't need to check the status of the transaction (cuz it's changed by the API Partner using bemosenderrr API)
                 report += f"Service missing for {str(instance)} with UUID : {str(instance.uuid)}"
             report += "-------------------------------------------------------" + "\n" + "End of report."
             #logger.info(report)
@@ -269,7 +269,7 @@ class CollectTransaction(AbstractPartnerTransaction, AbstractCollectPartner, Col
             if type(e).__name__ == CollectTransaction.DoesNotExist.__name__:
                 logger.info(f"OBJECT DOES NOT EXIST !")
                 global_transaction_model = apps.get_model(
-                        'bemoSenderr', 'GlobalTransaction')
+                        'bemosenderrr', 'GlobalTransaction')
                 global_transaction = global_transaction_model.objects.get(
                     uuid=params['gtx_uuid'])
                 periodic_task = PeriodicTasksEntry.objects.get(key=f"redbeat:checking {params['collect_uuid']} collect of {global_transaction.user} {global_transaction.uuid}")
@@ -308,7 +308,7 @@ class CollectTransaction(AbstractPartnerTransaction, AbstractCollectPartner, Col
             # Check if it's an Outbound partner (Partner that we use their API)
             if service:
                 try:
-                    partner_service = getattr(sys.modules['bemoSenderr.models.partner.services'], service)()
+                    partner_service = getattr(sys.modules['bemosenderrr.models.partner.services'], service)()
                     api_config = instance.partner.api_config
                     credentials = instance.partner.api_user.credentials
                     api_config['credentials'] = credentials
@@ -362,7 +362,7 @@ class CollectTransaction(AbstractPartnerTransaction, AbstractCollectPartner, Col
                     instance.save()
                     report += f"Exception caught : {str(e)}" + "\n"
                     send_email_celery_exception(e)
-            # API User (Inbound Partners who consume bemoSenderr API ) just changing the status is enough.
+            # API User (Inbound Partners who consume bemosenderrr API ) just changing the status is enough.
             else:
                 try:
                     report += f'Inbound partner cancelling {str(instance)}' + "\n"
@@ -425,7 +425,7 @@ class FundingTransaction(AbstractPartnerTransaction, AbstractFundingPartner):
     @shared_task(bind=True)
     def check_funding_inactivity(self, funding_uuid):
         try:
-            funding_transaction_model = apps.get_model('bemoSenderr', 'FundingTransaction')
+            funding_transaction_model = apps.get_model('bemosenderrr', 'FundingTransaction')
             instance = funding_transaction_model.objects.filter(uuid=funding_uuid).prefetch_related("globaltransaction_set", "globaltransaction_set__user").first()
             logger.info(f'CHECKING FUNDING OF {instance}')
             if instance:
@@ -456,9 +456,9 @@ class FundingTransaction(AbstractPartnerTransaction, AbstractFundingPartner):
                     if not language:
                         language = "FR"
                     notif_service = NotificationsHandler()
-                    push_notif_data = notif_service.get_tx_funding_incactivity_sender_push(lang=language, vars=[amount_origin, amount_destination, receiver_name, receiver_phone_number])
+                    push_notif_data = notif_service.get_tx_funding_incactivity_senderr_push(lang=language, vars=[amount_origin, amount_destination, receiver_name, receiver_phone_number])
                     pinpoint_service = PinpointWrapper()#SNSNotificationService()
-                    last_global_tx = apps.get_model('bemoSenderr', 'GlobalTransaction').objects.filter(user=global_tx.user).last()
+                    last_global_tx = apps.get_model('bemosenderrr', 'GlobalTransaction').objects.filter(user=global_tx.user).last()
                     user_snapshot = last_global_tx.user_snapshot
                     status = pinpoint_service.send_push_notifications_and_data(status=GlobalTransactionStatus.funding_error, user_snapshot=user_snapshot, user=user, data=push_notif_data, type="transaction", global_tx_uuid=str(global_tx.uuid))
                     logger.info(f"STATUS OF PUSH NOTIFICATION INACTIVITY FUNDING {status}")
@@ -483,9 +483,9 @@ class FundingTransaction(AbstractPartnerTransaction, AbstractFundingPartner):
                     language = global_tx.user.locale
                     if not language:
                         language = "FR"
-                    push_notif_data = notif_service.get_tx_funding_required_sender_push(lang=language, vars=[receiver_name, receiver_phone_number, total_amount, time_left_hours,time_left_minutes])
+                    push_notif_data = notif_service.get_tx_funding_required_senderr_push(lang=language, vars=[receiver_name, receiver_phone_number, total_amount, time_left_hours,time_left_minutes])
                     logger.info(f"push data{push_notif_data}")
-                    last_global_tx = apps.get_model('bemoSenderr', 'GlobalTransaction').objects.filter(user=global_tx.user).last()
+                    last_global_tx = apps.get_model('bemosenderrr', 'GlobalTransaction').objects.filter(user=global_tx.user).last()
                     user_snapshot = last_global_tx.user_snapshot
                     status = pinpoint_service.send_push_notifications_and_data(status=GlobalTransactionStatus.fundtransaction_in_progress, user_snapshot=user_snapshot, user=user, data=push_notif_data, type="transaction", global_tx_uuid=str(global_tx.uuid))
                     logger.info(f"STATUS OF PUSH NOTIFICATION REQUIRED FUNDING {status}")

@@ -7,7 +7,7 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0004_remove_transactionmethod_icon_url'),
+        ('bemosenderrr', '0004_remove_transactionmethod_icon_url'),
     ]
 
     operations = [

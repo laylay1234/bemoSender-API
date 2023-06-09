@@ -2,19 +2,19 @@
 
 from django.db import migrations
 import django_cryptography.fields
-import bemoSenderr.models.base
+import bemosenderrr.models.base
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0030_auto_20220714_1409'),
+        ('bemosenderrr', '0030_auto_20220714_1409'),
     ]
 
     operations = [
         migrations.AddField(
             model_name='user',
             name='credentials',
-            field=django_cryptography.fields.encrypt(bemoSenderr.models.base.JSONWrappedTextField(blank=True, default=None, null=True)),
+            field=django_cryptography.fields.encrypt(bemosenderrr.models.base.JSONWrappedTextField(blank=True, default=None, null=True)),
         ),
     ]

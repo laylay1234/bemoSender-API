@@ -3,12 +3,12 @@ from random import random
 from loguru import logger
 import requests
 from django.apps import apps
-from bemoSenderr.logger import send_email_celery_exception
-from bemoSenderr.models.base import CollectTransactionStatus
+from bemosenderrr.logger import send_email_celery_exception
+from bemosenderrr.models.base import CollectTransactionStatus
 from datetime import datetime
 from django.core.mail import EmailMultiAlternatives
 
-from bemoSenderr.models.partner.partner import Country
+from bemosenderrr.models.partner.partner import Country
 
 
 class ATPSService():
@@ -95,7 +95,7 @@ class ATPSService():
     def generate_reference_code(self):
         number = int(random() * 99999999999)
         atps_partner_queryset = apps.get_model(
-            'bemoSenderr', 'CollectTransaction').objects.filter(partner__api_config__contains={"serviceClass": "ATPSService"}, collect_code=number)
+            'bemosenderrr', 'CollectTransaction').objects.filter(partner__api_config__contains={"serviceClass": "ATPSService"}, collect_code=number)
         logger.info(f'ATPS queryset{atps_partner_queryset}')
         if len(atps_partner_queryset) > 0:
             logger.info('ATPS COLLECT CODE EXISTS RETRYING')
@@ -203,7 +203,7 @@ class ATPSService():
                 response_data['response'] = amount_destination_fee
                 return [CollectTransactionStatus.error, response_data]
             type_piece = self.getDocumentTypeID(user_snapshot['document']['type'])
-            instance = apps.get_model('bemoSenderr', 'CollectTransaction').objects.get(uuid=collect_uuid)
+            instance = apps.get_model('bemosenderrr', 'CollectTransaction').objects.get(uuid=collect_uuid)
             global_tx = instance.globaltransaction_set.all().first()
             dateDelivrancePiece = global_tx.user.created_at
             dateDelivrancePiece = dateDelivrancePiece.strftime("%Y-%m-%d")
@@ -216,7 +216,7 @@ class ATPSService():
                 phone_number = receiver_snapshot.get('phone_number', None)
                 phone_number = str(phone_number).replace('+', "")
                 phone_number = "00" + phone_number
-                channel = apps.get_model('bemoSenderr', 'MobileNetwork').objects.filter(display_name=receiver_snapshot.get('mobile_network')).first()
+                channel = apps.get_model('bemosenderrr', 'MobileNetwork').objects.filter(display_name=receiver_snapshot.get('mobile_network')).first()
                 receiver_network = None
                 if channel:
                     receiver_network = channel.partner_api_code_mapping.get('ATPSService')
@@ -321,7 +321,7 @@ class ATPSService():
                 logger.info('NO ATPS TRANSFER CODE ASSIGNED')
                 return  CollectTransactionStatus.error
             else:
-                instance = apps.get_model('bemoSenderr', 'CollectTransaction').objects.get(uuid=params['collect_uuid'])
+                instance = apps.get_model('bemosenderrr', 'CollectTransaction').objects.get(uuid=params['collect_uuid'])
                 global_tx = instance.globaltransaction_set.all().first()
                 destination_country_iso_code = global_tx.parameters.get('destination_country')
                 token = self.get_auth_token(iso_code=destination_country_iso_code, api_config=api_config)
@@ -373,18 +373,18 @@ class ATPSService():
             if not atps_transaction_code:
                 logger.info('CANCEL ORDER FAILED ATPS_TRANSACTION_NOT_FOUND')
                 return CollectTransactionStatus.not_found
-            instance = apps.get_model('bemoSenderr', 'CollectTransaction').objects.get(uuid=parameters['collect_uuid'])
+            instance = apps.get_model('bemosenderrr', 'CollectTransaction').objects.get(uuid=parameters['collect_uuid'])
             global_tx = instance.globaltransaction_set.all().first()
             created_at = datetime.strftime(instance.updated_at,"%Y-%m-%dT%H:%M:%S.%fZ")
             user_snapshot = global_tx.user_snapshot
-            sender_full_name = str(user_snapshot.get('first_name', "UNDEFINED")) + " " + str(user_snapshot.get('last_name', "UNDEFINED"))
+            senderr_full_name = str(user_snapshot.get('first_name', "UNDEFINED")) + " " + str(user_snapshot.get('last_name', "UNDEFINED"))
             receiver_snapshot = global_tx.receiver_snapshot
             receiver_full_name = str(receiver_snapshot.get('first_name', "UNDEFINED")) + " " + str(receiver_snapshot.get('last_name', "UNDEFINED"))
             amount_destination = global_tx.parameters.get('amount_destination')
             logger.info(f"CREATED AT {created_at}")
             body = f"""
             Date: {created_at}
-            Expéditeur: {sender_full_name}
+            Expéditeur: {senderr_full_name}
             Bénéficiaire: {receiver_full_name}
             Code Proxicash: {atps_transaction_code}
             Montant: {amount_destination}

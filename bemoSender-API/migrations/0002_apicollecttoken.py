@@ -9,7 +9,7 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0001_initial'),
+        ('bemosenderrr', '0001_initial'),
     ]
 
     operations = [
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('token', models.CharField(help_text='The Partner API user generated token', max_length=255)),
                 ('expires_at', models.DateTimeField(editable=False, help_text='Expiration time of the token')),
                 ('api_user', models.ForeignKey(help_text='The associated API User', on_delete=django.db.models.deletion.RESTRICT, to=settings.AUTH_USER_MODEL)),
-                ('global_transaction', models.ForeignKey(help_text='The global transaction associated', on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.globaltransaction')),
+                ('global_transaction', models.ForeignKey(help_text='The global transaction associated', on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.globaltransaction')),
             ],
             options={
                 'ordering': ['updated_at'],

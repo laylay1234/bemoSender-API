@@ -1,1 +1,1 @@
-https://bemoSenderr.dev/admin/bemoSenderr/order/{{ instance.uuid }}/change/
+https://bemosenderrr.dev/admin/bemosenderrr/order/{{ instance.uuid }}/change/

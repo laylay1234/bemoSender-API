@@ -1,5 +1,5 @@
 from modeltranslation.translator import register, TranslationOptions
-from bemoSenderr.models.partner.partner import Country, MobileNetwork, TransactionMethod
+from bemosenderrr.models.partner.partner import Country, MobileNetwork, TransactionMethod
 
 
 @register(Country)

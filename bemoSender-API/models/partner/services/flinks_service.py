@@ -4,7 +4,7 @@ import requests
 import json
 import re
 import traceback
-from bemoSenderr.logger import send_email_celery_exception
+from bemosenderrr.logger import send_email_celery_exception
 
 
 class FlinksService():

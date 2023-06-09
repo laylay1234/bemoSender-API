@@ -6,7 +6,7 @@
 
 <table  cellpadding="0" style=" margin:0 auto;padding: 10 50px 10px 50px; width:100%;border-collapse: collapse;">
   <tr>
-    <td colspan="2"><img  style="width: 100%" src="https://bemoSenderr.com/images/logo-bemoSenderr.png"></td>
+    <td colspan="2"><img  style="width: 100%" src="https://bemosenderrr.com/images/logo-bemosenderrr.png"></td>
     <td colspan="2" style="text-align:right;font-style:normal;font-weight:normal;font-size:50pt;font-family:sans-serif;color:#000000">
     INVOICE - FACTURE
     </td>
@@ -18,7 +18,7 @@
     <td colspan="1"></td>
     <td colspan="1" style=" text-align:center">
             <div style="text-align: right;white-space: nowrap;font-style:normal;font-weight:bold;font-size:x-large;font-family:sans-serif;color:#000000">
-                bemoSenderr Finance Ltd </div>
+                bemosenderrr Finance Ltd </div>
             <div style="text-align: right;font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
                 Quebec</div>
             <div style="text-align: right;font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
@@ -27,7 +27,7 @@
             <div style="text-align: right;font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
                 +1 438-795-5230</div>
             <div style="text-align: right;font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
-                www.bemoSenderr.com</div>
+                www.bemosenderrr.com</div>
     </td>
 </tr>
 <tr>
@@ -42,18 +42,18 @@
     <td colspan="2"  >
         <p style="font-style:normal;font-size:x-large;font-family:sans-serif;color:rgb(128, 128, 128)">BILL TO</p>
         <div style="font-style:normal;font-weight:bold;font-size:x-large;font-family:sans-serif;color:#000000">
-            {{ sender_first_name }} {{ sender_last_name }} <br></div>
+            {{ senderr_first_name }} {{ senderr_last_name }} <br></div>
         <div style="font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
-            {{sender_address_1 }}</div>
+            {{senderr_address_1 }}</div>
         <div style="font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
-            {{ user_city}} {{ sender_zip_code }}</div>
+            {{ user_city}} {{ senderr_zip_code }}</div>
         <div style="font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
-            {{sender_state }}, {{ user_country }}</div>
+            {{senderr_state }}, {{ user_country }}</div>
             <br>
         <div style="font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
-            {{sender_phone_number }}</div>
+            {{senderr_phone_number }}</div>
         <div style="font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
-            {{ sender_email }}</div>
+            {{ senderr_email }}</div>
     </td>
     <td colspan="1" style=" padding-top:15pt"> 
         <p style="text-align: right; white-space:nowrap;font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
@@ -63,7 +63,7 @@
         <p style="text-align: right;white-space:nowrap;font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
           <strong>Payment Date: </strong></p>
         <div style="background-color: #ececec;float:right;white-space:nowrap;padding:7pt 0pt 7pt 15pt;display:inline-block; text-align: right;font-style:normal;font-weight:bold;font-size:x-large;font-family:sans-serif;color:#000000">
-            Amount due({{ sender_origin_currency }}): </div>
+            Amount due({{ senderr_origin_currency }}): </div>
     </td>
     <td colspan="1" style =" padding-top:15pt">
         <p style="text-align: left;padding-left:15pt; white-space:nowrap;font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
@@ -73,7 +73,7 @@
         <p style="text-align: left;padding-left:15pt; white-space:nowrap;font-style:normal;font-size:x-large;font-family:sans-serif;color:#000000">
             {{invoice_date}}</p>
         <div style="background-color: #ececec;white-space:nowrap;padding:7pt 30pt 7pt 15pt;display:inline-block; text-align: right;font-style:normal;font-weight:bold;font-size:x-large;font-family:sans-serif;color:#000000">
-            {{origin_currency_short_sign}}{{sender_total_amount}}</div>
+            {{origin_currency_short_sign}}{{senderr_total_amount}}</div>
     </td>
 </tr>
 <tr>
@@ -82,7 +82,7 @@
         <div style="float: left; ">
             <div style="background-color: #20C9A7; padding: 10pt 100pt 10pt 10pt">
                 <div style="font-style:normal;white-space:nowrap;font-weight:bold;font-size:x-large;font-family:sans-serif;color:#000000;">
-                    Amount converted: {{ sender_converted_amount }} {{destination_currency_sign}}</div>
+                    Amount converted: {{ senderr_converted_amount }} {{destination_currency_sign}}</div>
                 <div style="font-style:normal;white-space:nowrap;font-weight:bold;font-size:x-large;font-family:sans-serif;color:#000000">
                     As per today, 1 {{origin_currency_sign}} = {{destination_lowest_amount}} {{destination_currency_sign}}</div>
             </div>
@@ -138,8 +138,8 @@
         </td>
         <td colspan="1" style="text-align: center;/*border-bottom: 5px #d3d3d3 solid;*/">
           <br>
-                <div style="white-space:nowrap;font-size:x-large;font-family:sans-serif;">{{origin_currency_short_sign}}{{sender_total_amount}}</div>
-                <div style="font-size:x-large;font-family:sans-serif;">{{origin_currency_short_sign}}{{sender_total_amount}}</div>
+                <div style="white-space:nowrap;font-size:x-large;font-family:sans-serif;">{{origin_currency_short_sign}}{{senderr_total_amount}}</div>
+                <div style="font-size:x-large;font-family:sans-serif;">{{origin_currency_short_sign}}{{senderr_total_amount}}</div>
                 <br>
         </td>
     </tr>
@@ -160,7 +160,7 @@
             <b style="float: right; white-space:nowrap; font-size:x-large;font-family:sans-serif;">Amount Paid(CAD):</b>
         </td>
         <td colspan="1" style="vertical-align: initial;text-align: center;font-size:x-large;font-family:sans-serif;">
-            <b >{{origin_currency_short_sign}}{{sender_total_amount}}</b>
+            <b >{{origin_currency_short_sign}}{{senderr_total_amount}}</b>
         </td>
     </tr>
 </table>

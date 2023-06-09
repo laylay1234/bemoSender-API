@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bemoSenderr', '0002_apicollecttoken'),
+        ('bemosenderrr', '0002_apicollecttoken'),
     ]
 
     operations = [

@@ -3,13 +3,13 @@ import json
 from django.apps import apps
 
 from loguru import logger
-from bemoSenderr.models.base import GlobalTransactionStatus, VerificationStatus
-from bemoSenderr.utils.appsync import make_client
+from bemosenderrr.models.base import GlobalTransactionStatus, VerificationStatus
+from bemosenderrr.utils.appsync import make_client
 from gql import gql
-from bemoSenderr.utils.mutation_queries import CREATE_APPSETTINGS_MUTATION, CREATE_COLLECT_TX_MUTATION, CREATE_COUNTRY_MUTATION, CREATE_CURRENCY_MUTATION, UPDATE_APPSETTINGS_MUTATION, UPDATE_COLLECT_TX_MUTATION, UPDATE_COUNTRY_MUTATION, UPDATE_CURRENCY_MUTATION, UPDATE_GLOBAL_TX_MUTATION, UPDATE_USER_MUTATION
+from bemosenderrr.utils.mutation_queries import CREATE_APPSETTINGS_MUTATION, CREATE_COLLECT_TX_MUTATION, CREATE_COUNTRY_MUTATION, CREATE_CURRENCY_MUTATION, UPDATE_APPSETTINGS_MUTATION, UPDATE_COLLECT_TX_MUTATION, UPDATE_COUNTRY_MUTATION, UPDATE_CURRENCY_MUTATION, UPDATE_GLOBAL_TX_MUTATION, UPDATE_USER_MUTATION
 
-from bemoSenderr.utils.notifications import NotificationsHandler
-from bemoSenderr.utils.pinpoint import PinpointWrapper
+from bemosenderrr.utils.notifications import NotificationsHandler
+from bemosenderrr.utils.pinpoint import PinpointWrapper
 import boto3
 from django.conf import settings
 
@@ -98,7 +98,7 @@ class SyncCollectTransactions():
     def sync_created_collect_transaction(self, collect_tx_uuid=None):
         try:
             logger.info(f"Syncing collect_transaction with UUID : {collect_tx_uuid}")
-            instance = apps.get_model('bemoSenderr.CollectTransaction').objects.get(uuid=collect_tx_uuid)
+            instance = apps.get_model('bemosenderrr.CollectTransaction').objects.get(uuid=collect_tx_uuid)
             partner_name = instance.partner.display_name
             items = instance.partner.api_config.get('img_urls', list())
             img_urls = list()
@@ -128,7 +128,7 @@ class SyncCollectTransactions():
     def sync_updated_collect_transaction(self, collect_tx_uuid=None, status=None):
         try:
             logger.info(f"Syncing collect_transaction with UUID : {collect_tx_uuid}")
-            instance = apps.get_model('bemoSenderr.CollectTransaction').objects.get(uuid=collect_tx_uuid)
+            instance = apps.get_model('bemosenderrr.CollectTransaction').objects.get(uuid=collect_tx_uuid)
             try:
                 params = {
                     "id": str(instance.uuid),
@@ -189,7 +189,7 @@ def push_globaltx_datastore(instance=None, status=None):
     response = None
     if instance and status not in [GlobalTransactionStatus.new,]: 
         print(f"pushing globaltransaction status  {instance.status}")
-        global_tx = apps.get_model('bemoSenderr.GlobalTransaction').objects.get(uuid=instance.uuid)
+        global_tx = apps.get_model('bemosenderrr.GlobalTransaction').objects.get(uuid=instance.uuid)
         try:
             client = make_client()
             params = {
@@ -296,7 +296,7 @@ def sync_kyc_verification_status(user, status):
                 }
                 """
         client = make_client()
-        instance = apps.get_model('bemoSenderr.KycVerificationRequest').objects.filter(user=user).latest('created_at')
+        instance = apps.get_model('bemosenderrr.KycVerificationRequest').objects.filter(user=user).latest('created_at')
         user_snapshot = instance.user_snapshot
         phone_number = user_snapshot['phone_number']
         cognito_client = boto3.client(
@@ -315,7 +315,7 @@ def sync_kyc_verification_status(user, status):
                     nickname = attr.get('Value', None)
                     break
         
-            kyc_verification_instances = apps.get_model('bemoSenderr.KycVerificationRequest').objects.filter(user=user)
+            kyc_verification_instances = apps.get_model('bemosenderrr.KycVerificationRequest').objects.filter(user=user)
             if len(kyc_verification_instances) <= 1 and nickname:
                 print('this is a migrated user')
                 return
@@ -331,7 +331,7 @@ def sync_kyc_verification_status(user, status):
         }
         if kyc_level is not None and status == VerificationStatus.verified:
             user_tier = int(kyc_level) + 1
-            verified_instances = apps.get_model('bemoSenderr.KycVerificationRequest').objects.filter(user=user, status=VerificationStatus.verified)
+            verified_instances = apps.get_model('bemosenderrr.KycVerificationRequest').objects.filter(user=user, status=VerificationStatus.verified)
             if len(verified_instances) > 1:
                 user_tier = int(kyc_level)
         elif kyc_level is not None and status == VerificationStatus.unverified:

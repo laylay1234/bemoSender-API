@@ -4,12 +4,12 @@ Main file for serializers declaration used by the API
 """
 # from django.contrib.auth.models import User
 from rest_framework import serializers
-from bemoSenderr.models import User
-from bemoSenderr.models.base import GlobalTransactionStatus
-from bemoSenderr.models.global_transaction import GlobalTransaction
-from bemoSenderr.models.partner.bank_verification import UserBankVerificationRequest
-from bemoSenderr.models.partner.kyc_verification import KycVerificationRequest
-from bemoSenderr.models.partner.partner import TransactionMethodAvailability, PartnerExchangeRate, ExchangeRateTier, UserTier
+from bemosenderrr.models import User
+from bemosenderrr.models.base import GlobalTransactionStatus
+from bemosenderrr.models.global_transaction import GlobalTransaction
+from bemosenderrr.models.partner.bank_verification import UserBankVerificationRequest
+from bemosenderrr.models.partner.kyc_verification import KycVerificationRequest
+from bemosenderrr.models.partner.partner import TransactionMethodAvailability, PartnerExchangeRate, ExchangeRateTier, UserTier
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -133,7 +133,7 @@ class RegisterUserDeviceSerializer(serializers.Serializer):
     app_version = serializers.CharField( help_text="The App version", required=True)
     time_zone = serializers.CharField(help_text="The timezone of the user", required=True)
     device_data = serializers.JSONField(help_text="The device data (JSON)", required=False)
-    gcm_senderid = serializers.CharField(help_text="The GCM SenderID", required=False)
+    gcm_senderrid = serializers.CharField(help_text="The GCM senderrID", required=False)
     app_identifier = serializers.CharField(help_text="The App identifier", required=False)
     installation_id = serializers.CharField(help_text="The installation ID", required=False)
 
@@ -149,7 +149,7 @@ class CancelGlobalTransactionSerializer(serializers.Serializer):
         fields = "__all__"
 
 
-class bemoSenderrAPISerializer(serializers.Serializer):
+class bemosenderrrAPISerializer(serializers.Serializer):
     request_schema = {
     "request": {
         "service": {

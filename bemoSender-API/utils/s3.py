@@ -1,7 +1,7 @@
 import boto3
 from django.conf import settings
 
-from bemoSenderr.logger import send_email_celery_exception
+from bemosenderrr.logger import send_email_celery_exception
 
 def make_s3_client():
     s3_client = boto3.client('s3')

@@ -6,9 +6,9 @@ import requests
 import json
 import hashlib
 import base64
-from bemoSenderr.models.base import GlobalTransactionStatus, PartnerStatus
+from bemosenderrr.models.base import GlobalTransactionStatus, PartnerStatus
 
-from bemoSenderr.models.partner.partner import Partner
+from bemosenderrr.models.partner.partner import Partner
 
 
 class ApayloService():
@@ -144,13 +144,13 @@ class ApayloService():
             apaylo = Partner.objects.filter(name="Apaylo").first()
             if apaylo and apaylo.status == PartnerStatus.active:
                 api_config = apaylo.api_config
-                global_transaction = apps.get_model("bemoSenderr.GlobalTransaction").filter(uuid=instance_uuid).select_related("user").first()
+                global_transaction = apps.get_model("bemosenderrr.GlobalTransaction").filter(uuid=instance_uuid).select_related("user").first()
                 description_counter = 1
-                user_transactions_count = apps.get_model("bemoSenderr.GlobalTransaction").objects.filter(
+                user_transactions_count = apps.get_model("bemosenderrr.GlobalTransaction").objects.filter(
                     status=GlobalTransactionStatus.refunded,
                     user=global_transaction.user
                 ).count()
-                app_settings = apps.get_model("bemoSenderr.AppSettings").objects.first()
+                app_settings = apps.get_model("bemosenderrr.AppSettings").objects.first()
                 security_answer = app_settings.config.get('interacDeposit', None).get("secret", None).get('answer', None)
                 security_question = app_settings.config.get('interacDeposit', None).get("secret", None).get('question', None)
                 if user_transactions_count:

@@ -2,7 +2,7 @@ import json
 import boto3
 from django.conf import settings
 
-from bemoSenderr.models.user import UserToken
+from bemosenderrr.models.user import UserToken
 
 
 """
@@ -121,7 +121,7 @@ class SNSNotificationService():
         - error: only used when type == "user_tier" (optional), indicates if there is an error in bank_verification.
     returns Boolean, based on the status of the response.(If the user has 2 devices and one of them failed return False)
     """
-    def send_push_notifications_and_data(self, user=None, data=None, type=None, title="bemoSenderr", global_tx_uuid="", error=None):
+    def send_push_notifications_and_data(self, user=None, data=None, type=None, title="bemosenderrr", global_tx_uuid="", error=None):
         try:
             endpoints = []
             if user:

@@ -3,7 +3,7 @@ from abc import abstractmethod
 from celery import shared_task
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from bemoSenderr.models.base import AbstractBaseModel
+from bemosenderrr.models.base import AbstractBaseModel
 from ..base import VerificationStatus
 
 

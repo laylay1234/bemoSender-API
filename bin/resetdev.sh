@@ -24,7 +24,7 @@ for i in $tbl;do mysql --host=$RDSHOST --port=3306 --user=${USER} --password=$PA
 set -e
 
 ENV='Dev-V3' python3 manage.py migrate
-ENV="Dev-V3" python3 manage.py loaddata bemoSenderr/fixtures/users.json
+ENV="Dev-V3" python3 manage.py loaddata bemosenderrr/fixtures/users.json
 
 
 DB_NAME='test_v1_connect' ENV='Test-V1' python3 manage.py migrate

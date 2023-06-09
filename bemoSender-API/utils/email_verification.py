@@ -96,13 +96,13 @@ def send_email(user, thread=True, **kwargs):
         expiry_ = kwargs.get('expiry')
         token, expiry = default_token_generator.make_token(user, expiry_)
 
-        sender = _get_validated_field('EMAIL_FROM_ADDRESS')
+        senderr = _get_validated_field('EMAIL_FROM_ADDRESS')
         domain = _get_validated_field('EMAIL_PAGE_DOMAIN')
         subject = _get_validated_field('EMAIL_MAIL_SUBJECT')
         mail_plain = _get_validated_field('EMAIL_MAIL_PLAIN')
         mail_html = _get_validated_field('EMAIL_MAIL_HTML')
 
-        args = (user, token, expiry, sender, domain, subject, mail_plain, mail_html)
+        args = (user, token, expiry, senderr, domain, subject, mail_plain, mail_html)
         if thread:
             t = Thread(target=send_email_thread, args=args)
             t.start()
@@ -112,7 +112,7 @@ def send_email(user, thread=True, **kwargs):
         raise Exception('The user model you provided is invalid')
 
 
-def send_email_thread(user, token, expiry, sender, domain, subject, mail_plain, mail_html):
+def send_email_thread(user, token, expiry, senderr, domain, subject, mail_plain, mail_html):
     domain += '/' if not domain.endswith('/') else ''
 
     def has_decorator(k):
@@ -145,7 +145,7 @@ def send_email_thread(user, token, expiry, sender, domain, subject, mail_plain, 
 
     html = render_to_string(mail_html, context)
 
-    msg = EmailMultiAlternatives(subject, text, sender, [user.email])
+    msg = EmailMultiAlternatives(subject, text, senderr, [user.email])
     msg.attach_alternative(html, 'text/html')
     msg.send()
     print(f"Sending email confirmation to user {user}")

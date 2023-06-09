@@ -2,10 +2,10 @@ from django.conf import settings
 from loguru import logger
 from random import random
 from django.apps import apps
-from bemoSenderr.models.partner.partner import  PartnerApiCallType
+from bemosenderrr.models.partner.partner import  PartnerApiCallType
 from redbeat import RedBeatSchedulerEntry as Entry
-from bemoSenderr.celery import app
-from bemoSenderr.models.task import PeriodicTasksEntry
+from bemosenderrr.celery import app
+from bemosenderrr.models.task import PeriodicTasksEntry
 
 
 def start_collect_periodic_task(collect_operation=None, global_transaction=None):
@@ -52,18 +52,18 @@ def start_collect_periodic_task(collect_operation=None, global_transaction=None)
         try:
             
             e = Entry.from_key(key=f"redbeat:checking {str(collect_operation.uuid)} collect of {global_transaction.user} {global_transaction.uuid}", app=app)
-            periodic_task, created = PeriodicTasksEntry.objects.get_or_create(key=e.key, task="bemoSenderr.models.partner.transactions.check_collect_status",
+            periodic_task, created = PeriodicTasksEntry.objects.get_or_create(key=e.key, task="bemosenderrr.models.partner.transactions.check_collect_status",
                                                                             name=e.name, args=[params]
                                                                             )
             logger.info(f"Periodic task is new {e.key}")
         except Exception as e:
             e = Entry(schedule=schedule, name=f"checking {str(collect_operation.uuid)} collect of {global_transaction.user} {global_transaction.uuid}", app=app,
-                    task="bemoSenderr.models.partner.transactions.check_collect_status", args=[params])
+                    task="bemosenderrr.models.partner.transactions.check_collect_status", args=[params])
             e.save()
             logger.info(
                 "Collect Transaction periodic task args " + str(e.args))
             # Periodic task object to manage redbeat periodic tasks(entries) dynamically)
-            periodic_task, created = PeriodicTasksEntry.objects.get_or_create(key=e.key, task="bemoSenderr.models.partner.transactions.check_collect_status",
+            periodic_task, created = PeriodicTasksEntry.objects.get_or_create(key=e.key, task="bemosenderrr.models.partner.transactions.check_collect_status",
                                                                             name=e.name, schedule=schedule, args=[params]
                                                                             )
             periodic_task.save()
@@ -91,7 +91,7 @@ def getTransactionId(idLength=None, stringLength=None, prefix=None):
             testId = prefix + testId
         print('TEST GENERATED ID')
         collect_transaction_model = apps.get_model(
-            'bemoSenderr', 'CollectTransaction')
+            'bemosenderrr', 'CollectTransaction')
         collect_code_query = collect_transaction_model.objects.filter(
             collect_code=testId)
         if len(collect_code_query) > 0:

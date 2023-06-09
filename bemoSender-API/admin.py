@@ -8,27 +8,27 @@ from django.utils.translation import ugettext_lazy as _
 from djangoql.admin import DjangoQLSearchMixin
 from guardian.models import UserObjectPermission
 from reversion.admin import VersionAdmin
-from bemoSenderr.models.partner.partner import APICollectToken, APIRequestMonitoring, AppSettings, Country, Currency, MobileNetwork, \
+from bemosenderrr.models.partner.partner import APICollectToken, APIRequestMonitoring, AppSettings, Country, Currency, MobileNetwork, \
     MobileNetworkAvailability, Partner, TransactionMethodAvailability, PartnerPayer, PartnerSettlementAccount, PartnerExchangeRate, ExchangeRateTier, \
     TransactionMethod, UserTier
-from bemoSenderr.models.global_transaction import GlobalTransaction
-from bemoSenderr.models import User, UserTask
-from bemoSenderr.models.partner import UserBankVerificationRequest, KycVerificationRequest
-from bemoSenderr.models.task import PeriodicTasksEntry
-from bemoSenderr.models.partner.transactions import CollectTransaction, FundingTransaction, TxLimitCumul
-from bemoSenderr.models.user import AdminAlerts, UserToken
+from bemosenderrr.models.global_transaction import GlobalTransaction
+from bemosenderrr.models import User, UserTask
+from bemosenderrr.models.partner import UserBankVerificationRequest, KycVerificationRequest
+from bemosenderrr.models.task import PeriodicTasksEntry
+from bemosenderrr.models.partner.transactions import CollectTransaction, FundingTransaction, TxLimitCumul
+from bemosenderrr.models.user import AdminAlerts, UserToken
 from django_json_widget.widgets import JSONEditorWidget
 from django.db import models
 from fsm_admin.mixins import FSMTransitionMixin
-# from bemoSenderr.translation import *
+# from bemosenderrr.translation import *
 from modeltranslation.admin import TranslationAdmin
 from django.db.models import Q
 from django.contrib.admin import SimpleListFilter
 
 '''
-admin.site.site_title = "{} | {}".format(settings.CONFIG['env'], _('bemoSenderr'))
-admin.site.index_title = "{} | {}".format(settings.CONFIG['env'], _('bemoSenderr'))
-admin.site.site_header = "{} | {}".format(settings.CONFIG['env'], _('bemoSenderr'))
+admin.site.site_title = "{} | {}".format(settings.CONFIG['env'], _('bemosenderrr'))
+admin.site.index_title = "{} | {}".format(settings.CONFIG['env'], _('bemosenderrr'))
+admin.site.site_header = "{} | {}".format(settings.CONFIG['env'], _('bemosenderrr'))
 admin.site.site_url = "https://{}".format(settings.CONFIG['DOMAIN_ROOT'])
 '''
 

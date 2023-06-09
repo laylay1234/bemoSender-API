@@ -9,7 +9,7 @@ import django.db.models.deletion
 import django.utils.timezone
 import guardian.mixins
 import uuid
-import bemoSenderr.models.partner.base
+import bemosenderrr.models.partner.base
 
 
 class Migration(migrations.Migration):
@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
                 'ordering': ['-updated_at'],
                 'abstract': False,
             },
-            bases=(models.Model, bemoSenderr.models.partner.base.AbstractCollectPartner),
+            bases=(models.Model, bemosenderrr.models.partner.base.AbstractCollectPartner),
         ),
         migrations.CreateModel(
             name='Country',
@@ -121,7 +121,7 @@ class Migration(migrations.Migration):
                 'ordering': ['-updated_at'],
                 'abstract': False,
             },
-            bases=(models.Model, bemoSenderr.models.partner.base.AbstractFundingPartner),
+            bases=(models.Model, bemosenderrr.models.partner.base.AbstractFundingPartner),
         ),
         migrations.CreateModel(
             name='Partner',
@@ -228,7 +228,7 @@ class Migration(migrations.Migration):
                 ('user_snapshot', models.JSONField(default=dict, verbose_name='User data')),
                 ('partner_response', models.JSONField(verbose_name='Partner API response')),
                 ('partner_parameters', models.JSONField(blank=True, help_text='account_id and frontend_request_id', null=True)),
-                ('partner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.partner')),
+                ('partner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.partner')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -246,8 +246,8 @@ class Migration(migrations.Migration):
                 ('active', models.BooleanField(help_text='Transaction method availability')),
                 ('api_code', models.IntegerField(help_text='The api code of this transaction method')),
                 ('condition', models.JSONField(blank=True, null=True, verbose_name='Condition on the active payer')),
-                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bemoSenderr.partner')),
-                ('partner_method', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bemoSenderr.transactionmethod')),
+                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bemosenderrr.partner')),
+                ('partner_method', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bemosenderrr.transactionmethod')),
             ],
             options={
                 'verbose_name_plural': 'Transaction Methods Availabilities',
@@ -264,8 +264,8 @@ class Migration(migrations.Migration):
                 ('active', models.BooleanField(help_text='Status of the this account')),
                 ('is_primary_account', models.BooleanField()),
                 ('account_number', models.CharField(help_text='The account number of this account', max_length=255)),
-                ('currency', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.currency')),
-                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.partner')),
+                ('currency', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.currency')),
+                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.partner')),
             ],
             options={
                 'ordering': ['updated_at'],
@@ -281,7 +281,7 @@ class Migration(migrations.Migration):
                 ('_version', models.CharField(blank=True, help_text='Datatstore version used in mutations', max_length=255, null=True)),
                 ('name', models.CharField(max_length=255, verbose_name="Partner's payer name")),
                 ('code', models.IntegerField(help_text="The partner's payer code")),
-                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.partner')),
+                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.partner')),
             ],
             options={
                 'ordering': ['updated_at'],
@@ -304,10 +304,10 @@ class Migration(migrations.Migration):
                 ('commission_fixed', models.CharField(help_text='Sales commission per transaction for this partner', max_length=255)),
                 ('sales_percentage', models.CharField(help_text='The percentage of transactions on the partner network', max_length=255)),
                 ('query_response', models.JSONField(blank=True, null=True)),
-                ('country_destination', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='rate_country_destination', to='bemoSenderr.country')),
-                ('country_origin', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='rate_country_origin', to='bemoSenderr.country')),
-                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.partner')),
-                ('settlement_currency', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.currency')),
+                ('country_destination', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='rate_country_destination', to='bemosenderrr.country')),
+                ('country_origin', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='rate_country_origin', to='bemosenderrr.country')),
+                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.partner')),
+                ('settlement_currency', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.currency')),
             ],
             options={
                 'ordering': ['updated_at'],
@@ -323,7 +323,7 @@ class Migration(migrations.Migration):
                 ('_version', models.CharField(blank=True, help_text='Datatstore version used in mutations', max_length=255, null=True)),
                 ('key', models.CharField(help_text='Probably the account name', max_length=64, verbose_name='Key')),
                 ('balance', models.DecimalField(decimal_places=2, help_text='The calculated balance for the given account.', max_digits=30, verbose_name='Balance')),
-                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.partner')),
+                ('partner', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.partner')),
             ],
             options={
                 'ordering': ['updated_at'],
@@ -333,7 +333,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='partner',
             name='active_payer',
-            field=models.ForeignKey(blank=True, help_text='The active payer', null=True, on_delete=django.db.models.deletion.RESTRICT, related_name='active_payer', to='bemoSenderr.partnerpayer'),
+            field=models.ForeignKey(blank=True, help_text='The active payer', null=True, on_delete=django.db.models.deletion.RESTRICT, related_name='active_payer', to='bemosenderrr.partnerpayer'),
         ),
         migrations.AddField(
             model_name='partner',
@@ -343,12 +343,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='partner',
             name='country',
-            field=models.ForeignKey(help_text='The country of the Partner', on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.country'),
+            field=models.ForeignKey(help_text='The country of the Partner', on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.country'),
         ),
         migrations.AddField(
             model_name='partner',
             name='currency',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.currency'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.currency'),
         ),
         migrations.CreateModel(
             name='KycVerificationRequest',
@@ -362,7 +362,7 @@ class Migration(migrations.Migration):
                 ('partner_response', models.JSONField(verbose_name='Partner API response')),
                 ('query_counter', models.CharField(help_text='Current verification request counter', max_length=255)),
                 ('custom_transaction_id', models.CharField(help_text='An internally created transaction ID', max_length=255)),
-                ('partner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.partner')),
+                ('partner', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.partner')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -388,8 +388,8 @@ class Migration(migrations.Migration):
                 ('funding_method', models.CharField(max_length=255, verbose_name='Funding method of the user')),
                 ('collect_method', models.CharField(max_length=255, verbose_name='cHollect method of the user')),
                 ('revenue', models.CharField(blank=True, max_length=255, null=True, verbose_name='The revenue from this transaction')),
-                ('collect_transactions', models.ManyToManyField(blank=True, null=True, to='bemoSenderr.CollectTransaction')),
-                ('funding_transaction', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.fundingtransaction')),
+                ('collect_transactions', models.ManyToManyField(blank=True, null=True, to='bemosenderrr.CollectTransaction')),
+                ('funding_transaction', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.fundingtransaction')),
                 ('user', models.ForeignKey(blank=True, help_text='Associated user', null=True, on_delete=django.db.models.deletion.RESTRICT, to=settings.AUTH_USER_MODEL)),
             ],
             options={
@@ -401,7 +401,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='fundingtransaction',
             name='partner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.partner'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.partner'),
         ),
         migrations.CreateModel(
             name='ExchangeRateTier',
@@ -412,11 +412,11 @@ class Migration(migrations.Migration):
                 ('_version', models.CharField(blank=True, help_text='Datatstore version used in mutations', max_length=255, null=True)),
                 ('bottom_amount', models.PositiveIntegerField(help_text='Minimum value of this rate tier')),
                 ('distribution_percentage', models.CharField(help_text='The percentage of transactions in this rate tier', max_length=255)),
-                ('profit_margin_percentage', models.CharField(help_text='Sales commission per transaction for bemoSenderr', max_length=255)),
+                ('profit_margin_percentage', models.CharField(help_text='Sales commission per transaction for bemosenderrr', max_length=255)),
                 ('applicable_rate', models.CharField(help_text='calculataed exchange rate available to the client based on ratetier level', max_length=255)),
                 ('collect_transaction_method_fees', models.JSONField(help_text='Fees related to the delivery method')),
-                ('country_destination', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='rate_tier_country_destination', to='bemoSenderr.country')),
-                ('country_origin', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='rate_tier_country_origin', to='bemoSenderr.country')),
+                ('country_destination', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='rate_tier_country_destination', to='bemosenderrr.country')),
+                ('country_origin', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='rate_tier_country_origin', to='bemosenderrr.country')),
             ],
             options={
                 'ordering': ['updated_at'],
@@ -426,16 +426,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='country',
             name='default_currency',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.currency'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.currency'),
         ),
         migrations.AddField(
             model_name='collecttransaction',
             name='partner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.partner'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.partner'),
         ),
         migrations.AddField(
             model_name='collecttransaction',
             name='partner_settlement_currency',
-            field=models.ForeignKey(blank=True, help_text='The currency of the partner settlement account', null=True, on_delete=django.db.models.deletion.RESTRICT, to='bemoSenderr.partnersettlementaccount'),
+            field=models.ForeignKey(blank=True, help_text='The currency of the partner settlement account', null=True, on_delete=django.db.models.deletion.RESTRICT, to='bemosenderrr.partnersettlementaccount'),
         ),
     ]

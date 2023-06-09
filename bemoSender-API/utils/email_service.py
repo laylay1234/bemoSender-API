@@ -14,7 +14,7 @@ from google.oauth2 import service_account
 import six
 from google.auth import crypt
 from django.conf import settings
-from bemoSenderr.models.partner.partner import AppSettings
+from bemosenderrr.models.partner.partner import AppSettings
 
 """
 This module is for handling Gmail API and filtering interac emails.
@@ -91,7 +91,7 @@ class EmailService:
             # The file token.json stores the user's access and refresh tokens, and is
             # created automatically when the authorization flow completes for the first
             # time.
-            gmail_partner = apps.get_model('bemoSenderr', "Partner").objects.get(name="Gmail")
+            gmail_partner = apps.get_model('bemosenderrr', "Partner").objects.get(name="Gmail")
             credentials = gmail_partner.api_user.credentials
             appsettings = AppSettings.objects.first()
             deposit_email = appsettings.config.get("interacDeposit", None).get("mailbox", None)
@@ -129,7 +129,7 @@ class EmailService:
             # The file token.json stores the user's access and refresh tokens, and is
             # created automatically when the authorization flow completes for the first
             # time.
-            gmail_partner = apps.get_model('bemoSenderr', "Partner").objects.get(name="Gmail")
+            gmail_partner = apps.get_model('bemosenderrr', "Partner").objects.get(name="Gmail")
             credentials = gmail_partner.api_user.credentials
             token = {
                 "token": credentials['token'],

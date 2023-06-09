@@ -12,7 +12,7 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 
 
-#from bemoSenderr.models.user import AdminAlerts
+#from bemosenderrr.models.user import AdminAlerts
 class SendAdminAlerts():
 
     def __init__(self) -> None:
@@ -120,7 +120,7 @@ class SendAdminAlerts():
                 Environment: {self.env}
                 Partner: {partner}
                 TRX ID: {str(global_tx.uuid)}
-                SENDER ID: {str(global_tx.user.uuid)}
+                senderr ID: {str(global_tx.user.uuid)}
                 RECIPIENT ID: 
                 SENT TO  {global_tx.receiver_snapshot['first_name']} {global_tx.receiver_snapshot['last_name']} ({global_tx.receiver_snapshot['phone_number']})
                 BY {global_tx.user_snapshot['first_name']} {global_tx.user_snapshot['last_name']} ({global_tx.user_snapshot['phone_number']})
@@ -167,7 +167,7 @@ class SendAdminAlerts():
 
     def send_admin_email(self, body=None, partner=None):
         if body and partner:
-            recipients = apps.get_model('bemoSenderr.AdminAlerts').objects.filter(can_receive_celery_exceptions=True)
+            recipients = apps.get_model('bemosenderrr.AdminAlerts').objects.filter(can_receive_celery_exceptions=True)
             recipients_emails = []
             if recipients:
                 for recipient in recipients:
@@ -193,9 +193,9 @@ class SendAdminAlerts():
                     "deposit_type" : params.get('deposit_type', "Auto Deposit"),
                     "email": params.get('email', None)
                 }
-            html_message = render_to_string(os.path.join(os.getcwd(), 'bemoSenderr','templates', 'deposits', 'unmatched_deposit.html'), data)
+            html_message = render_to_string(os.path.join(os.getcwd(), 'bemosenderrr','templates', 'deposits', 'unmatched_deposit.html'), data)
             print(html_message)
-            recipients = apps.get_model('bemoSenderr.AdminAlerts').objects.filter(can_receive_celery_exceptions=True)
+            recipients = apps.get_model('bemosenderrr.AdminAlerts').objects.filter(can_receive_celery_exceptions=True)
             recipients_emails = []
             if recipients:
                 for recipient in recipients:
@@ -279,7 +279,7 @@ logger.info(prettified_list)
 
 def send_email_celery_exception(exception):
     e = traceback.format_exc()
-    recipients = apps.get_model('bemoSenderr.AdminAlerts').objects.filter(can_receive_celery_exceptions=True)
+    recipients = apps.get_model('bemosenderrr.AdminAlerts').objects.filter(can_receive_celery_exceptions=True)
     recipients_emails = []
     if recipients:
         for recipient in recipients:
