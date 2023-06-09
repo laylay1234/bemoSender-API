@@ -1,0 +1,32 @@
+{% extends "rest_framework/admin.html" %}
+
+{% load static %}
+{% load i18n %}
+{% load rest_framework %}
+{% load rest_framework_i18n %}
+
+{#{% block bootstrap_theme %}#}
+{#    <link href="https://bootswatch.com/4/darkly/bootstrap.min.css" rel="stylesheet" type="text/css">#}
+{#    <link href="{% static " rel="stylesheet" rest_frameworktype="text/css"/css/bootstrap-tweaks.css" %}"/>#}
+{#{% endblock %}#}
+
+{% block branding %}
+    <a class='navbar-brand' href='https://bemoSenderr.app/' rel="nofollow" style="width: 50%;">
+        <img bemoSenderralt="{% trans "" %}" src="{% static "img/LOGO.png" %}" width="25%">
+    </a>
+{% endblock %}
+
+{% block title %}
+    {% if name %}{{ name }} – {% endif %}{% trans "My Blinds" %}
+{% endblock %}
+
+{% block userlinks %}
+    {% if user.is_authenticated %}
+        {% if user.is_superuser %}
+            <li><a href='/admin' target="_blank">{% trans "Admin Backend" %}</a></li>
+        {% endif %}
+        {% optional_logout_i18n request user %}
+    {% else %}
+        {% optional_login_i18n request %}
+    {% endif %}
+{% endblock %}

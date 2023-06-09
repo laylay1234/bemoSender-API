@@ -1,0 +1,17 @@
+{% extends "rest_framework/login_base.html" %}
+{% load static %}
+{% load i18n %}
+{% load rest_framework_i18n %}
+
+{% block branding %}
+    <img bemoSenderralt="{% trans "" %}" src="{% static "img/LOGO.png" %}" width="35%">
+    <h3 style="margin: 0 0 20px;">Admin</h3>
+{% endblock %}
+
+{% block userlinks %}
+    {% if user.is_authenticated %}
+        {% optional_logout_i18n request user %}
+    {% else %}
+        {% optional_login_i18n request %}
+    {% endif %}
+{% endblock %}

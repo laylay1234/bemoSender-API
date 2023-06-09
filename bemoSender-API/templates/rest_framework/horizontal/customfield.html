@@ -1,0 +1,87 @@
+{% load rest_framework %}
+{% load i18n %}
+
+<script>
+    var nbCustomField = {{ field.value|length }};
+
+    function genAddCustomFieldDiv(nb){
+        return "  " +
+            "   <div id=\"custom_fields-" + nb + "\" class=\"col-sm-10\" style=\"border: 3px double black;padding-bottom: 10px;margin-bottom: 5px;\">\n" +
+            "        <div>{%  trans "Add new CustomField" %} </div>\n" +
+            "            <label class=\"col-sm-4\" style=\"padding-top: 5px;\">{%  trans "New CustomField Key" %}</label>\n" +
+            "            <input name=\"custom_fields[" + nb + "]key\"\n" +
+            "                   class=\"form-control\"\n" +
+            "                   type=\"text\">\n" +
+            "            <label class=\"col-sm-4\" style=\"padding-top: 5px;\">{%  trans "new CustomField Value" %}</label>\n" +
+            "            <input name=\"custom_fields[" + nb + "]value\"\n" +
+            "                   class=\"form-control\"\n" +
+            "                   type=\"text\">\n" +
+            "    <button onclick=\"removeCustomField(" + nb + ")\" type=\"button\" class=\"btn btn-primary\">{%  trans " Remove new custom_fields" %}</button> \n" +
+            "   </div>"
+    }
+    function addCustomField() {
+        const rawHtml = genAddCustomFieldDiv(nbCustomField)
+        $("#custom_fields_container").append(rawHtml);
+        nbCustomField++;
+    }
+
+    function removeCustomField(nId) {
+        nbCustomField--;
+        const custom_fieldsId = "#custom_fields-" + nId;
+         $(custom_fieldsId).remove();
+    }
+
+</script>
+
+<div class="form-group">
+    {% if field.label %}
+        <label class="col-sm-2 control-label">
+            {{ field.label }}
+        </label>
+    {% endif %}
+    <br />
+    <div class="col-sm-10" id="custom_fields_container">
+        {% for value in field.value %}
+            <div class="col-sm-10" id="custom_fields-{{ forloop.counter0 }}" style="border: 3px double black;padding-bottom: 10px;margin-bottom: 5px;">
+                <label class="col-sm-4" style="padding-top: 5px;">CustomField {{ forloop.counter }} pk</label>
+                <input != "hidden"
+                       %}
+                       %}
+                       %}
+                       %}autofocus{% %}placeholder="{{ style.placeholder }}" %}value="{{ value.pk }}" Noneand class="form-control" endif
+                       endif endif if if if is name="custom_fields[{{ forloop.counter0 }}]pk"not readonly style.autofocus
+                       style.input_type style.placeholder type="text" value.pk {% {% {% {% {%>
+
+                <label class="col-sm-4" style="padding-top: 5px;">CustomField {{ forloop.counter }} Key</label>
+                <input != "hidden"
+                       %}
+                       %}
+                       %} %}autofocus{% %}placeholder="{{ style.placeholder }}" %}value="{{ value.key }}"None and class="form-control"
+                       endif endif endif if if if isname="custom_fields[{{ forloop.counter0 }}]key" not style.autofocus
+                       style.input_type style.placeholder type="text" value.key {% {% {% {% {%>
+
+                <label class="col-sm-4" style="padding-top: 5px;">CustomField {{ forloop.counter }} Value</label>
+                <input != "hidden"
+                       %}
+                       %}
+                       %} %}autofocus{% %}placeholder="{{ style.placeholder }}" %}value="{{ value.value }}"None and class="form-control"
+                       endif endif endif if if if isname="custom_fields[{{ forloop.counter0 }}]value" not style.autofocus
+                       style.input_type style.placeholder type="text" value.value {% {% {% {% {%>
+
+                <button class="btn btn-primary" onclick="removeCustomField({{ forloop.counter0 }})" type="button"> Remove CustomField</button>
+            </div>
+        {% endfor %}
+
+        {% if field.errors %}
+            {% for error in field.errors %}
+                <span class="help-block">{{ error }}</span>
+            {% endfor %}
+        {% endif %}
+
+        {% if field.help_text %}
+            <span class="help-block">{{ field.help_text|safe }}</span>
+        {% endif %}
+    </div>
+    <button class="btn btn-primary" onclick="addCustomField()" type="button">{%  trans "Add new custom_fields" %}</button>
+</div>
+

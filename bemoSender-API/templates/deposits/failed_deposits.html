@@ -1,0 +1,47 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+</head>
+
+<body>
+    <div>
+        Report Date: {{date_now}} <br>
+        Environment: {{env}}<br>
+        Transfer from {{sender_fullname}}<br>
+        Amount: {{amount}}$<br>
+        Transfer Email Date : {{email_date}}<br>
+        {{deposit_type}} failed<br>
+        Duplicates were found in User list<br>
+        Failure count: 1<br>
+        <br><br>
+        Found User:<br>
+        &nbsp;&nbsp;&nbsp;ID: {{user_id}}<br>
+        &nbsp;&nbsp;&nbsp;Name: {{user_fullname}}<br>
+        &nbsp;&nbsp;&nbsp;Phone: {{user_phone_number}}<br>
+        <br><br>
+        Duplicates ({{ length_duplicates }}):<br>
+        &nbsp;&nbsp;&nbsp;original - {{sender_fullname}} ({{user_email}})<br>
+        {% for duplicate in duplicates %}
+        &nbsp;&nbsp;&nbsp;{{duplicate.uuid}} - {{duplicate.fullname}} ({{duplicate.phone_number}} - {{duplicate.email}})
+        {{duplicate.status}}
+        <br>
+        {% endfor %}
+        <br>
+        Possible matches ({{ length_duplicates }}):<br>
+        {<br>
+            &nbsp;&nbsp;&nbsp;"original": "{{user_fullname}}",<br>
+            &nbsp;&nbsp;&nbsp;"email": "{{user_email}}"<br>
+        }<br>
+        {% for duplicate in duplicates %}
+        {<br>
+            &nbsp;&nbsp;&nbsp;"target": "{{duplicate.fullname}}",<br>
+            &nbsp;&nbsp;&nbsp;"rating": {{duplicate.ratio}},<br>
+            &nbsp;&nbsp;&nbsp;"email": "{{duplicate.email}}"<br>
+        }<br>
+        {% endfor %}
+        <br>
+    </div>
+</body>
+
+</html>

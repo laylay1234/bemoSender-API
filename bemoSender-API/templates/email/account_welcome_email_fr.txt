@@ -1,0 +1,12 @@
+Bienvenue {{userFirstName}},
+
+Nous sommes une fière entreprise multiculturelle opérant aux États-Unis, au Canada et au Maroc. Cela nous permet de servir une grande communauté marocaine.
+Nous respectons les principes de la finance islamique. Nous ne faisons pas d'usure, ce qui signifie que nos frais sont équitables et que notre taux de change est le taux du jour.
+
+- Gagnez du Temps: Transférez de l'argent en moins de 30 secondes
+- Frais équitables: Frais justes et fixes de 0,99 $ CAD pour tout montant de transfert (jusqu'à 999 $ CA)
+- Choisissez comment: Directement au compte bancaire ou retrait d'espèces
+- Suivez votre transfert: Recevez des notifications directement sur votre téléphone
+
+bemoSenderr
+https://bemoSenderr.com

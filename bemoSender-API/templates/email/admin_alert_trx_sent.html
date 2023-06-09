@@ -1,0 +1,25 @@
+
+<p>
+    <b>Object: </b>{{ time_now }} <br>
+    <b>Environment: </b>{{ environment }} <br>
+    <b>Content: </b>YXF OPERATION - TRX sent to {{ receiver_first_name }} {{ receiver_last_name }} ({{ receiver_phone_number }}) <br>
+    <b>By: </b>{{ user_first_name }} {{ user_last_name }} {{ user_phone_number }} <br>
+    <b> DATE OF BIRTH: </b>{{ user_birth_date }}<br>
+    <b>CITY OF BIRTH: </b>{{ user_birth_city }}<br>
+    <b>COUNTRY OF BIRTH: </b>{{ user_birth_country }}<br><br>
+    <b>AMOUNT: </b>{{ amount_origin }} {{ currency_origin }} - {{ amount_destination }} {{ currency_destination }} <br>
+    {% if "bank" in tx_method %}
+        <b>BANK TRANSFER: </b> <br>
+        ACCOUNT NUMBER: <b>{{ receiver_account_number }}</b> <br>
+        SWIFT: <b>{{ receiver_swift_code }}</b>
+    {% endif %}
+    {% if "cash" in tx_method %}
+        <b>AGENCIES: </b> <br>
+        {% for agency in agencies %}
+            &nbsp;&nbsp;<b>{{ agency.partner.name }}</b> : <b>{{ agency.collect_code }}</b> <br>
+        {% endfor %}
+    {% endif %}
+    {% if "mobile" in tx_method%}
+        <b>MOBILE MONEY</b>: <b>{{receiver_mobile_money}}</b>
+    {% endif %}
+</p>

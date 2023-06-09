@@ -1,0 +1,7 @@
+Bonjour {{userFullName}},
+
+Pour des raisons de conformité et de vérifications, votre compte associé au numéro de téléphone suivant a été suspendu.
+Numéro de téléphone: {{username}}
+
+bemoSenderr
+https://bemoSenderr.com

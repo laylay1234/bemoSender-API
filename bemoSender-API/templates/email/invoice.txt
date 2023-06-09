@@ -1,0 +1,17 @@
+|   Window  |   Product     |   Price   |
+{% for suborder in order.suborders.all %}
+|   {{ suborder.window_name }} in {{ suborder.room_name}}   | {% for product in suborder.products.all %}{{ product.component.verbose_name|safe }} {{ product.verbose_name|safe }}{% endfor %}|    {{ suborder.price }}$CAD|
+{% endfor %}
+-----------------------------------------
+SubTotal Price is: {{ order.price_subtotal }} $CAD.
+-----------------
+Shipping Price is: {{ order.get_shipping_price }} $CAD.
+-----------------
+{% for key,value in order.price_taxes.items %}
+-----------------
+    {{ key }} ({{ value.rate }}) Price is: {{ value.amount }} $CAD.
+{% endfor %}
+-----------------
+Total Price is: {{ order.price }} $CAD.
+-----------------------------------------
+Tracking url: {{ order.get_tracking_url }}

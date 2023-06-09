@@ -1,0 +1,115 @@
+{%  load i18n %}
+{% load static %}
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!--
+      Load the CoreAPI library and the API schema.
+
+      /static/rest_framework/js/coreapi-0.1.1.js
+      /docs/schema.js
+  -->
+
+    <script language="JavaScript" src="{% static 'rest_framework/js/coreapi-0.1.1.js' %}"></script>
+    <script api-docssrc="{% url "" version=v1 %}" language="JavaScript"></script>
+</head>
+<body>
+    <script language="JavaScript">
+        // Setup some globally accessible state
+        window.client = new coreapi.Client();
+        window.loggedIn = false;
+
+        function errOut(msg) {
+            $('#error').html(msg).css("display", "block")
+            return true
+        }
+
+        function loginUser(username, password) {
+            let action = ["v1", "api","token", "create"];
+            {# TODO: should probably be doing some checking here ? #}
+            let params = {username: username, password: password};
+            client.action(schema, action, params).then(function(result) {
+                // On success, instantiate an authenticated client.
+                let auth = window.coreapi.auth.TokenAuthentication({
+                    scheme: 'JWT',
+                    token: result['access'],
+                })
+                window.client = coreapi.Client({auth: auth});
+                window.loggedIn = true;
+            }).catch(function (error) {
+                // Handle error case where eg. user provides incorrect credentials.
+                errOut('{% trans 'Please Try Again' %}');
+            })
+        }
+
+        function get_assets() {
+            let action = ["v1", "assets", "list"];
+            {#let params = {search: 'bemoSenderr'};#}
+            let params = {};
+            client.action(schema, action, params).then(function(result) {
+                for (const asset of result['results']) {
+                    $('#inner').append(`<div style='flex; align-items: center; justify-content: center;padding: 10px; '><span style='background: #2f90cc; margin: 10px; padding: 5px;'>${asset['name']}</span>{% trans "Title" %}: ${asset['title']})</div>`)
+                }
+                // Return value is in 'result'
+            }).catch(function (error) {
+                errOut(error);
+            })
+        }
+
+        const waitForOpenConnection = (socket) => {
+            return new Promise((resolve, reject) => {
+                const maxNumberOfAttempts = 10
+                const intervalTime = 200 //ms
+
+                let currentAttempt = 0
+                const interval = setInterval(() => {
+                    if (currentAttempt > maxNumberOfAttempts - 1) {
+                        clearInterval(interval)
+                        reject(new Error('Maximum number of attempts exceeded'))
+                    } else if (socket.readyState === socket.OPEN) {
+                        clearInterval(interval)
+                        resolve()
+                    }
+                    currentAttempt++
+                }, intervalTime)
+            })
+        }
+
+        const sendMessage = async (socket, msg) => {
+            console.log('sending ' + msg);
+            if (socket.readyState !== socket.OPEN) {
+                try {
+                    await waitForOpenConnection(socket)
+                    socket.send(msg)
+                } catch (err) { console.error(err) }
+            } else {
+                socket.send(msg)
+            }
+        }
+
+        function uuidv4() {
+            return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
+        }
+
+        $(document).ready(function(){
+            loginUser('demo', 'demodemo')
+            get_assets()
+
+            $("#error").click(function(){
+                $("#error").html(null);
+            });
+
+
+        });
+
+
+    </script>
+</body>
+<div id="outer" style="background: #8B9AA7; display: flex; align-items: center; justify-content: center;">
+    <span id="error" style="color: #ff6347; display: none;"></span>
+    <div id="inner"></div>
+</div>
+<div id="ws"></div>
+</html>
